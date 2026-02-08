@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Media/Asset Management
+// ============================================
+
+model Media {
+  id              String   @id @default(cuid())
+  fileName        String   @db.VarChar(255) // Original filename
+  filePath        String   @unique // Storage path (local/cloud)
+  publicUrl       String   // CDN/access URL
+  mimeType        String   @db.VarChar(100) // image/jpeg, etc
+  size            Int      // Bytes
+  width           Int? // For images
+  height          Int? // For images
+  
+  // Relations
+  memories        Memory[] @relation("MemoryCover")
+  galleryPhotos   Gallery[] @relation("GalleryImage")
+  letterImages    Letter[] @relation("LetterImage")
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([createdAt])
+  @@index([mimeType])
+}
+
+// ============================================
+// Memory Items (Timeline)
+// ============================================
+
+model Memory {
+  id              String   @id @default(cuid())
+  date            DateTime
+  title           String   @db.VarChar(255)
+  description     String   @db.Text
+  emoji           String   @db.VarChar(10) // Unicode emoji
+  
+  // Relations
+  coverId         String?
+  cover           Media?   @relation("MemoryCover", fields: [coverId], references: [id], onDelete: SetNull)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  publishedAt     DateTime? // When published
+  
+  @@index([date])
+  @@index([publishedAt])
+}
+
+// ============================================
+// Gallery Items
+// ============================================
+
+model Gallery {
+  id              String   @id @default(cuid())
+  title           String   @db.VarChar(255)
+  description     String?  @db.Text
+  order           Int      @default(0) // Sort order
+  
+  // Relations
+  imageId         String   @unique // One image per gallery item
+  image           Media    @relation("GalleryImage", fields: [imageId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([order])
+}
+
+// ============================================
+// Love Letter Chapters
+// ============================================
+
+model Letter {
+  id              String   @id @default(cuid())
+  title           String   @db.VarChar(255)
+  content         String   @db.Text // Markdown optional
+  order           Int      @default(0)
+  published       Boolean  @default(false)
+  
+  // Relations
+  imageId         String?
+  image           Media?   @relation("LetterImage", fields: [imageId], references: [id], onDelete: SetNull)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([order])
+  @@index([published])
+}
+
+// ============================================
+// Audit Log (Security & Compliance)
+// ============================================
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  action          String   @db.VarChar(50) // "CREATE", "UPDATE", "DELETE", "UPLOAD"
+  entityType      String   @db.VarChar(50) // "Memory", "Gallery", "Letter", "Media"
+  entityId        String   @db.VarChar(100)
+  changes         Json? // Diff/changelog
+  ipAddress       String   @db.VarChar(45) // Support IPv6
+  userAgent       String   @db.Text // Browser info
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([action, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([entityType, entityId])
+}
+
+// ============================================
+// Settings (Dynamic Configuration)
+// ============================================
+
+model Settings {
+  key             String   @id @db.VarChar(100)
+  value           String   @db.Text
+  description     String?  @db.Text
+  updatedAt       DateTime @updatedAt
+}
