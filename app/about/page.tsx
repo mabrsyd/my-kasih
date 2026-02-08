@@ -1,99 +1,117 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { fadeInUpVariants, containerVariants, staggerContainerVariants, itemVariants } from '@/lib/animations';
+import ScrollReveal, { StaggerReveal } from '@/components/ScrollReveal';
+import MomentOfSilence from '@/components/MomentOfSilence';
+import { cinematicFadeVariants } from '@/lib/animations';
 
 export default function About() {
+  const storyChapters = [
+    {
+      icon: '✦',
+      title: 'Awal Pertemuan',
+      content: 'Semua bermula dari momen yang tak akan pernah kulupakan. Kamu hadir dalam hidupku seperti sinar mentari yang menembus awan. Ada sesuatu yang ajaib tentang saat itu - koneksi yang terasa lebih dalam dari kata-kata. Bukan hanya cinta pada pandangan pertama; tapi pengakuan jiwa yang selalu kutunggu sepanjang hidupku.'
+    },
+    {
+      icon: '♥',
+      title: 'Kenapa Kamu',
+      content: 'Kamu membuatku ingin menjadi orang yang lebih baik setiap hari. Kebaikanmu tak terbatas, tawamu menular, dan kehadiranmu membawa kedamaian di saat gelisahku. Kamu melihatku - bukan hanya siapa aku sekarang, tapi siapa yang ingin aku jadi. Bersamamu, aku merasa aman untuk menjadi diriku seutuhnya.'
+    },
+    {
+      icon: '∞',
+      title: 'Perjalanan Kita',
+      content: 'Setiap momen yang kita bagikan adalah berkah. Dari kencan kopi yang tenang hingga lupa waktu, hingga percakapan malam tentang mimpi dan ketakutan, hingga pertengkaran kecil yang hanya membuat kita lebih kuat - setiap bab cerita kita berarti. Kamu mengajariku bahwa cinta bukan hanya perasaan; tapi pilihan yang kita buat setiap hari untuk hadir satu sama lain.'
+    },
+    {
+      icon: '◇',
+      title: 'Selamanya',
+      content: 'Aku tidak tahu apa yang masa depan simpan, tapi aku tahu bahwa aku ingin menghadapinya denganmu di sisiku. Apakah kita mendaki gunung atau duduk dalam keheningan, apakah kita menangis atau tertawa sampai sakit - aku ingin mengalami semuanya bersamamu. Kamu adalah petualangan terbesarku, rumah teraman, dan cinta selamanya.'
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-warm pt-24 pb-20">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="relative">
+      {/* Grain overlay */}
+      <div className="grain-overlay" />
+
+      {/* Hero section */}
+      <section className="min-h-[60vh] flex items-center justify-center section-breathe pt-24">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          variants={cinematicFadeVariants}
+          initial="initial"
+          animate="animate"
+          className="text-center content-intimate"
         >
-          {/* Header */}
-          <motion.div variants={fadeInUpVariants} className="text-center mb-16">
-            <h1 className="heading-romantic mb-4">Tentang Kita 💕</h1>
-            <p className="text-gray-600 text-lg font-serif-body">
-              Our love story, in the words from my heart
-            </p>
-          </motion.div>
-
-          {/* Story sections */}
-          <motion.div
-            variants={staggerContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="space-y-12"
+          <motion.span 
+            className="text-4xl block mb-8 opacity-60"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.6 }}
+            transition={{ duration: 1, delay: 0.2 }}
           >
-            {/* Section 1 */}
-            <motion.div variants={itemVariants} className="card-romantic">
-              <div className="flex gap-4 items-start">
-                <span className="text-4xl min-w-fit">🌟</span>
-                <div>
-                  <h2 className="subheading-romantic mb-3">The Beginning</h2>
-                  <p className="text-gray-700 font-serif-body leading-relaxed">
-                    It all started with a moment I'll never forget. You walked into my life like a ray of sunshine breaking through the clouds. There was something magical about that instant - a connection that felt deeper than words could ever express. It wasn't just love at first sight; it was recognition of a soul I've been waiting my whole life to meet.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Section 2 */}
-            <motion.div variants={itemVariants} className="card-romantic md:ml-12">
-              <div className="flex gap-4 items-start">
-                <span className="text-4xl min-w-fit">❤️</span>
-                <div>
-                  <h2 className="subheading-romantic mb-3">Why You</h2>
-                  <p className="text-gray-700 font-serif-body leading-relaxed">
-                    You make me want to be a better person every single day. Your kindness knows no bounds, your laughter is infectious, and your presence brings peace to my most restless moments. You see me - not just who I am, but who I'm trying to become. With you, I feel safe to be completely myself, vulnerabilities and all.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Section 3 */}
-            <motion.div variants={itemVariants} className="card-romantic">
-              <div className="flex gap-4 items-start">
-                <span className="text-4xl min-w-fit">🎵</span>
-                <div>
-                  <h2 className="subheading-romantic mb-3">Our Journey</h2>
-                  <p className="text-gray-700 font-serif-body leading-relaxed">
-                    Every moment we've shared has been a blessing. From quiet coffee dates where we lost track of time, to late night conversations about dreams and fears, to silly fights that only made us stronger - every chapter of our story matters. You've taught me that love is not just a feeling; it's a choice we make every day to show up for each other.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Section 4 */}
-            <motion.div variants={itemVariants} className="card-romantic md:ml-12">
-              <div className="flex gap-4 items-start">
-                <span className="text-4xl min-w-fit">🌹</span>
-                <div>
-                  <h2 className="subheading-romantic mb-3">Forever & Always</h2>
-                  <p className="text-gray-700 font-serif-body leading-relaxed">
-                    I don't know what the future holds, but I know that I want to face it with you by my side. Whether we're climbing mountains or sitting in silence, whether we're crying or laughing until our sides hurt - I want to experience it all with you. You are my greatest adventure, my safest home, and my forever love.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Bottom accent */}
-          <motion.div
-            variants={fadeInUpVariants}
-            className="text-center mt-16 pt-12 border-t border-white/30"
-          >
-            <p className="text-gray-600 font-serif-body text-lg italic">
-              "I love you not because of who you are, but because of who I am when I'm with you."
-            </p>
-            <p className="text-gray-500 font-serif-body mt-4">— Selamanya milikmu ❤️</p>
-          </motion.div>
+            ♥
+          </motion.span>
+          <h1 className="text-poetry text-dark-rose mb-6">Tentang Kita</h1>
+          <p className="text-intimate">
+            Cerita cinta kita, dalam kata-kata dari hatiku
+          </p>
         </motion.div>
-      </div>
+      </section>
+
+      {/* Story chapters */}
+      <section className="section-breathe">
+        <div className="max-w-2xl mx-auto px-6">
+          <StaggerReveal staggerDelay={0.2}>
+            {storyChapters.map((chapter, index) => (
+              <div 
+                key={index}
+                className={`mb-16 last:mb-0 ${index % 2 === 1 ? 'md:ml-12' : ''}`}
+              >
+                <div className="glass rounded-2xl p-8 shadow-romantic hover-glow transition-all duration-500">
+                  <div className="flex gap-6 items-start">
+                    <span className="text-2xl text-romantic-red opacity-60 mt-1">
+                      {chapter.icon}
+                    </span>
+                    <div>
+                      <h2 className="font-serif-display text-xl text-dark-rose mb-4">
+                        {chapter.title}
+                      </h2>
+                      <p className="text-intimate leading-relaxed">
+                        {chapter.content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </StaggerReveal>
+        </div>
+      </section>
+
+      {/* Emotional moment */}
+      <MomentOfSilence 
+        quote="Aku mencintaimu bukan karena siapa kamu, tapi karena siapa aku saat bersamamu"
+        author="Selamanya milikmu"
+      />
+
+      {/* Closing section */}
+      <section className="section-breathe">
+        <div className="content-intimate text-center">
+          <ScrollReveal>
+            <motion.div
+              className="text-5xl mb-8"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              ♥
+            </motion.div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.3}>
+            <p className="text-whisper">
+              Dan cerita kita belum berakhir...
+            </p>
+          </ScrollReveal>
+        </div>
+      </section>
     </div>
   );
 }

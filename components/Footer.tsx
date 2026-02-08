@@ -11,108 +11,88 @@ export default function Footer() {
     <motion.footer
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 1 }}
       viewport={{ once: true }}
-      className="w-full bg-white/40 backdrop-blur-sm border-t border-white/20 mt-20"
+      className="w-full section-breathe"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Brand */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="font-serif-display text-xl font-bold bg-gradient-to-r from-romantic-red to-pastel-red bg-clip-text text-transparent mb-2">
-              {SITE_NAME}
-            </h3>
-            <p className="text-gray-600 text-sm">
-              A romantic journey of love and memories
-            </p>
-          </motion.div>
+      <div className="max-w-2xl mx-auto px-6">
+        {/* Decorative line */}
+        <motion.div 
+          className="w-12 h-px bg-romantic-red/30 mx-auto mb-12"
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        />
 
-          {/* Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+        {/* Main content */}
+        <div className="text-center mb-12">
+          <motion.h3 
+            className="font-serif-display text-lg text-dark-rose mb-4"
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            viewport={{ once: true }}
           >
-            <h4 className="font-serif-body font-semibold text-gray-700 mb-3">
-              Navigate
-            </h4>
-            <ul className="space-y-2">
-              {[
-                { label: 'Home', href: '/' },
-                { label: 'Memories', href: '/memories' },
-                { label: 'Gallery', href: '/gallery' },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-600 hover:text-romantic-red text-sm transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {SITE_NAME}
+          </motion.h3>
+          
+          <motion.p 
+            className="text-whisper mb-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+          >
+            Dibangun dengan cinta, dirancang untuk emosi
+          </motion.p>
+
+          {/* Navigation links */}
+          <motion.div 
+            className="flex justify-center gap-8 mb-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+          >
+            {[
+              { label: 'Beranda', href: '/' },
+              { label: 'Kenangan', href: '/memories' },
+              { label: 'Galeri', href: '/gallery' },
+              { label: 'Surat', href: '/letter' },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-dark-rose/60 hover:text-romantic-red text-xs tracking-widest uppercase transition-colors duration-300"
+              >
+                {link.label}
+              </Link>
+            ))}
           </motion.div>
 
-          {/* Social & Contact */}
+          {/* Heart */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            viewport={{ once: true }}
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            className="text-2xl text-romantic-red/60 mb-8"
           >
-            <h4 className="font-serif-body font-semibold text-gray-700 mb-3">
-              Connect
-            </h4>
-            <p className="text-gray-600 text-sm mb-2">
-              Built with love, designed for emotions.
-            </p>
-            <p className="text-gray-600 text-sm">
-              ❤️ Made with Framer Motion & Next.js
-            </p>
+            ♥
           </motion.div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-white/20 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-600 text-sm text-center md:text-left">
-              © {currentYear} {SITE_NAME}. All moments cherished forever.
-            </p>
-            <div className="flex gap-4">
-              <motion.a
-                whileHover={{ scale: 1.2 }}
-                href="#"
-                className="text-gray-500 hover:text-romantic-red transition-colors"
-                title="Heart"
-              >
-                ❤️
-              </motion.a>
-              <motion.a
-                whileHover={{ scale: 1.2 }}
-                href="#"
-                className="text-gray-500 hover:text-romantic-red transition-colors"
-                title="Love"
-              >
-                💌
-              </motion.a>
-              <motion.a
-                whileHover={{ scale: 1.2 }}
-                href="#"
-                className="text-gray-500 hover:text-romantic-red transition-colors"
-                title="Music"
-              >
-                🎵
-              </motion.a>
-            </div>
-          </div>
-        </div>
+        {/* Copyright */}
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.6 }}
+        >
+          <p className="text-xs text-dark-rose/40 tracking-wide">
+            © {currentYear} — Semua momen disimpan selamanya
+          </p>
+        </motion.div>
       </div>
     </motion.footer>
   );

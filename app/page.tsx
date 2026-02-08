@@ -3,7 +3,10 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import AnimatedText from '@/components/AnimatedText';
-import { fadeInUpVariants, containerVariants } from '@/lib/animations';
+import FloatingHearts from '@/components/FloatingHearts';
+import MomentOfSilence from '@/components/MomentOfSilence';
+import ScrollReveal from '@/components/ScrollReveal';
+import { cinematicFadeVariants, breatheVariants, whisperVariants } from '@/lib/animations';
 import { HERO_MESSAGES } from '@/lib/constants';
 import { useState, useEffect } from 'react';
 
@@ -15,124 +18,186 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-romantic flex flex-col items-center justify-center px-4">
-      {/* Floating background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{ y: [0, -30, 0] }}
-          transition={{ duration: 6, repeat: Infinity }}
-          className="absolute top-20 left-10 text-6xl opacity-10"
-        >
-          ❤️
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, 30, 0] }}
-          transition={{ duration: 8, repeat: Infinity, delay: 1 }}
-          className="absolute bottom-32 right-10 text-5xl opacity-10"
-        >
-          💕
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, -20, 0] }}
-          transition={{ duration: 7, repeat: Infinity, delay: 2 }}
-          className="absolute top-1/2 right-1/4 text-4xl opacity-10"
-        >
-          ✨
-        </motion.div>
-      </div>
+    <div className="relative">
+      {/* Grain overlay for texture */}
+      <div className="grain-overlay" />
+      
+      {/* Floating hearts background */}
+      <FloatingHearts count={6} />
 
-      {/* Main content */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 max-w-3xl text-center"
-      >
-        {/* Top accent */}
+      {/* Hero Section - First 5 seconds impact */}
+      <section className="min-h-screen flex flex-col items-center justify-center px-4 relative">
+        {/* Vignette effect */}
+        <div className="vignette" />
+
+        {/* Main content */}
         <motion.div
-          variants={fadeInUpVariants}
-          className="mb-6"
+          variants={cinematicFadeVariants}
+          initial="initial"
+          animate="animate"
+          className="relative z-10 max-w-2xl text-center"
         >
-          <div className="inline-block">
-            <span className="text-6xl animate-float">❤️</span>
-          </div>
-        </motion.div>
+          {/* Subtle breathing heart */}
+          <motion.div
+            variants={breatheVariants}
+            initial="initial"
+            animate="animate"
+            className="mb-12"
+          >
+            <span className="text-5xl opacity-60">♥</span>
+          </motion.div>
 
-        {/* Main heading */}
-        <motion.h1
-          variants={fadeInUpVariants}
-          className="heading-romantic mb-4 text-4xl sm:text-5xl md:text-6xl"
-        >
-          Untuk Kamu
-        </motion.h1>
+          {/* Main heading - Poetry style */}
+          <motion.h1
+            className="text-poetry text-dark-rose mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          >
+            Untuk Kamu,
+            <br />
+            <span className="text-romantic-red">Yang Tercinta</span>
+          </motion.h1>
 
-        {/* Animated message */}
-        <motion.div variants={fadeInUpVariants} className="mb-8">
-          <p className="text-gray-600 text-lg sm:text-xl mb-6 font-serif-body">
+          {/* Whisper message */}
+          <motion.p
+            variants={whisperVariants}
+            initial="initial"
+            animate="animate"
+            className="text-intimate mb-12 max-w-md mx-auto"
+          >
             {randomMessage}
-          </p>
+          </motion.p>
 
-          {/* Typing effect subtitle */}
-          <div className="min-h-12 flex items-center justify-center">
+          {/* Animated subtitle with delay */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5, duration: 1 }}
+            className="mb-16"
+          >
             <AnimatedText
-              text="A romantic journey of memories and love"
-              className="text-2xl sm:text-3xl md:text-4xl font-serif-display text-romantic-red font-semibold"
-              duration={0.04}
+              text="Perjalanan cinta kita yang indah..."
+              className="text-handwritten text-lg text-romantic-red/70"
+              duration={0.06}
             />
-          </div>
+          </motion.div>
+
+          {/* CTA Buttons - Romantic style */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2, duration: 0.8 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <Link href="/letter">
+              <motion.button
+                whileHover={{ y: -3 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.3 }}
+                className="btn-romantic hover-glow"
+              >
+                Baca Surat Cinta ♥
+              </motion.button>
+            </Link>
+            <Link href="/memories">
+              <motion.button
+                whileHover={{ y: -3 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.3 }}
+                className="btn-romantic"
+              >
+                Lihat Kenangan
+              </motion.button>
+            </Link>
+          </motion.div>
         </motion.div>
 
-        {/* CTA Button */}
+        {/* Scroll indicator - subtle */}
         <motion.div
-          variants={fadeInUpVariants}
-          className="flex flex-col sm:flex-row gap-4 justify-center mt-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          transition={{ delay: 3, duration: 1 }}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2"
         >
-          <Link href="/memories">
-            <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="button-romantic px-8 py-4 text-lg"
-            >
-              Lihat Kenangan Kami ❤️
-            </motion.button>
-          </Link>
-          <Link href="/about">
-            <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="button-romantic-outline px-8 py-4 text-lg"
-            >
-              Tentang Kita
-            </motion.button>
-          </Link>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            className="text-dark-rose/50 text-center"
+          >
+            <p className="text-whisper mb-2 text-xs tracking-widest uppercase">Scroll</p>
+            <span className="text-lg">↓</span>
+          </motion.div>
         </motion.div>
+      </section>
 
-        {/* Scroll indicator */}
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="mt-20 text-gray-500 text-sm"
-        >
-          <p className="mb-2">Scroll untuk melanjutkan</p>
-          <p className="text-2xl">↓</p>
-        </motion.div>
-      </motion.div>
+      {/* Moment of Silence - Emotional pause */}
+      <MomentOfSilence 
+        quote="Setiap detik bersamamu adalah hadiah terindah dalam hidupku"
+      />
 
-      {/* Bottom accent */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-      >
-        <motion.span
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="text-4xl"
-        >
-          💝
-        </motion.span>
-      </motion.div>
+      {/* Story teaser section */}
+      <section className="section-breathe">
+        <div className="content-intimate text-center">
+          <ScrollReveal delay={0.2}>
+            <h2 className="text-poetry text-3xl text-dark-rose/80 mb-8">
+              Cerita Kita
+            </h2>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.4}>
+            <p className="text-intimate mb-12">
+              Dari pertemuan pertama hingga hari ini, setiap momen adalah 
+              lembaran indah dalam buku cerita cinta kita...
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.6}>
+            <Link href="/about">
+              <motion.span 
+                className="link-romantic text-sm uppercase tracking-widest"
+                whileHover={{ x: 5 }}
+              >
+                Baca Cerita Lengkap →
+              </motion.span>
+            </Link>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Gallery teaser */}
+      <section className="section-breathe bg-white/30">
+        <div className="content-intimate text-center">
+          <ScrollReveal>
+            <h2 className="text-poetry text-3xl text-dark-rose/80 mb-8">
+              Galeri Kenangan
+            </h2>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.3}>
+            <p className="text-intimate mb-8">
+              Foto-foto indah yang mengabadikan momen berharga kita bersama.
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.5}>
+            <Link href="/gallery">
+              <motion.span 
+                className="link-romantic text-sm uppercase tracking-widest"
+                whileHover={{ x: 5 }}
+              >
+                Lihat Galeri →
+              </motion.span>
+            </Link>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Final emotional moment */}
+      <MomentOfSilence 
+        quote="Aku mencintaimu, hari ini, besok, dan selamanya"
+        author="Untukmu yang tersayang"
+      />
     </div>
   );
 }

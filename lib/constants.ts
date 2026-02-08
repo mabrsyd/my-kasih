@@ -1,4 +1,4 @@
-export const SITE_NAME = 'Untuk Kamu ❤️';
+export const SITE_NAME = 'Ennou Happy Finiarie ❤️';
 export const SITE_DESCRIPTION = 'A romantic journey of love and memories';
 export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'localhost:3000';
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
