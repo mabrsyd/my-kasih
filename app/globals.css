@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --color-soft-pink: #f8d7e6;
+  --color-pastel-red: #e6a1a1;
+  --color-beige: #f5f0eb;
+  --color-cream: #faf8f6;
+  --color-romantic-red: #d4757f;
+  --color-warm-beige: #e8dcc8;
+  --color-dark-rose: #a85a6a;
+  
+  --font-serif-display: 'Playfair Display', serif;
+  --font-serif-body: 'Lora', serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient(135deg, #f8d7e6 0%, #faf8f6 100%);
+  color: #5a5a5a;
+  font-family: 'Lora', serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Selection styling */
+::selection {
+  background-color: #e6a1a1;
+  color: white;
+}
+
+/* Smooth animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  10%, 30% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px rgba(212, 117, 127, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(212, 117, 127, 0.6));
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-fadeInDown {
+  animation: fadeInDown 0.8s ease-out forwards;
+}
+
+.animate-slideInFromLeft {
+  animation: slideInFromLeft 0.8s ease-out forwards;
+}
+
+.animate-slideInFromRight {
+  animation: slideInFromRight 0.8s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-heartBeat {
+  animation: heartBeat 1.3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
