@@ -13,12 +13,12 @@ export default function Footer() {
       whileInView={{ opacity: 1 }}
       transition={{ duration: 1 }}
       viewport={{ once: true }}
-      className="w-full section-breathe"
+      className="w-full section-breathe border-t border-purple-secondary/20"
     >
       <div className="max-w-2xl mx-auto px-6">
         {/* Decorative line */}
         <motion.div 
-          className="w-12 h-px bg-romantic-red/30 mx-auto mb-12"
+          className="w-16 h-px bg-purple-accent/20 mx-auto mb-12"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
@@ -28,7 +28,7 @@ export default function Footer() {
         {/* Main content */}
         <div className="text-center mb-12">
           <motion.h3 
-            className="font-serif-display text-lg text-dark-rose mb-4"
+            className="font-serif-display text-lg text-purple-primary mb-4"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -38,7 +38,7 @@ export default function Footer() {
           </motion.h3>
           
           <motion.p 
-            className="text-whisper mb-8"
+            className="text-whisper text-purple-warm/70 mb-8"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -49,7 +49,7 @@ export default function Footer() {
 
           {/* Navigation links */}
           <motion.div 
-            className="flex justify-center gap-8 mb-8"
+            className="flex justify-center gap-6 md:gap-8 flex-wrap mb-8"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -64,7 +64,7 @@ export default function Footer() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-dark-rose/60 hover:text-romantic-red text-xs tracking-widest uppercase transition-colors duration-300"
+                className="text-purple-primary/60 hover:text-purple-accent text-xs tracking-widest uppercase transition-colors duration-300"
               >
                 {link.label}
               </Link>
@@ -73,9 +73,9 @@ export default function Footer() {
 
           {/* Heart */}
           <motion.div
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="text-2xl text-romantic-red/60 mb-8"
+            animate={{ scale: [1, 1.12, 1] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="text-3xl text-purple-accent/50 mb-8"
           >
             ♥
           </motion.div>
@@ -89,7 +89,7 @@ export default function Footer() {
           viewport={{ once: true }}
           transition={{ delay: 0.6 }}
         >
-          <p className="text-xs text-dark-rose/40 tracking-wide">
+          <p className="text-xs text-purple-primary/35 tracking-wide">
             © {currentYear} — Semua momen disimpan selamanya
           </p>
         </motion.div>

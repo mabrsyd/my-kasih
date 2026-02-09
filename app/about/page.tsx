@@ -3,7 +3,9 @@
 import { motion } from 'framer-motion';
 import ScrollReveal, { StaggerReveal } from '@/components/ScrollReveal';
 import MomentOfSilence from '@/components/MomentOfSilence';
-import { cinematicFadeVariants } from '@/lib/animations';
+import { cinematicFadeVariants, containerVariants, itemVariants } from '@/lib/animations';
+import { H1, H2, P, Whisper } from '@/components/ui/Typography';
+import { Card, CardContent } from '@/components/ui/Card';
 
 export default function About() {
   const storyChapters = [
@@ -35,55 +37,81 @@ export default function About() {
       <div className="grain-overlay" />
 
       {/* Hero section */}
-      <section className="min-h-[60vh] flex items-center justify-center section-breathe pt-24">
+      <section className="min-h-[60vh] flex items-center justify-center pt-32 pb-16 md:pb-24">
         <motion.div
           variants={cinematicFadeVariants}
-          initial="initial"
-          animate="animate"
-          className="text-center content-intimate"
+          initial="hidden"
+          animate="visible"
+          className="text-center content-intimate px-4"
         >
           <motion.span 
-            className="text-4xl block mb-8 opacity-60"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.6 }}
-            transition={{ duration: 1, delay: 0.2 }}
+            className="text-5xl md:text-6xl block mb-8 text-purple-accent opacity-40"
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: [1, 1.1, 1], opacity: 0.4 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
           >
             ♥
           </motion.span>
-          <h1 className="text-poetry text-dark-rose mb-6">Tentang Kita</h1>
-          <p className="text-intimate">
-            Cerita cinta kita, dalam kata-kata dari hatiku
-          </p>
+          
+          <H1 className="mb-6 text-purple-primary">Tentang Kita</H1>
+          
+          <P className="max-w-lg mx-auto text-lg text-purple-warm opacity-90">
+            Cerita cinta kita, dalam kata-kata dari hatiku yang paling dalam
+          </P>
         </motion.div>
       </section>
 
       {/* Story chapters */}
       <section className="section-breathe">
-        <div className="max-w-2xl mx-auto px-6">
-          <StaggerReveal staggerDelay={0.2}>
+        <div className="max-w-3xl mx-auto px-4">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-10%" }}
+            className="space-y-8"
+          >
             {storyChapters.map((chapter, index) => (
-              <div 
+              <motion.div
                 key={index}
-                className={`mb-16 last:mb-0 ${index % 2 === 1 ? 'md:ml-12' : ''}`}
+                variants={itemVariants}
               >
-                <div className="glass rounded-2xl p-8 shadow-romantic hover-glow transition-all duration-500">
-                  <div className="flex gap-6 items-start">
-                    <span className="text-2xl text-romantic-red opacity-60 mt-1">
-                      {chapter.icon}
-                    </span>
-                    <div>
-                      <h2 className="font-serif-display text-xl text-dark-rose mb-4">
+                <Card
+                  variant="minimal"
+                  padding="lg"
+                  className="hover:shadow-lg hover:border-purple-secondary/60 transition-all duration-300"
+                >
+                  <CardContent className="flex gap-5 md:gap-6">
+                    {/* Icon circle */}
+                    <motion.div
+                      className="flex-shrink-0 mt-1"
+                      animate={{ scale: [1, 1.15, 1] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: index * 0.3,
+                      }}
+                    >
+                      <div className="w-12 h-12 bg-purple-secondary/20 rounded-full flex items-center justify-center text-xl text-purple-accent">
+                        {chapter.icon}
+                      </div>
+                    </motion.div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <H2 className="text-2xl mb-3 text-purple-primary font-serif-display">
                         {chapter.title}
-                      </h2>
-                      <p className="text-intimate leading-relaxed">
+                      </H2>
+                      <P className="text-neutral-dark leading-relaxed">
                         {chapter.content}
-                      </p>
+                      </P>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </StaggerReveal>
+          </motion.div>
         </div>
       </section>
 
@@ -95,20 +123,21 @@ export default function About() {
 
       {/* Closing section */}
       <section className="section-breathe">
-        <div className="content-intimate text-center">
+        <div className="content-intimate text-center px-4">
           <ScrollReveal>
             <motion.div
-              className="text-5xl mb-8"
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              className="text-6xl mb-8 drop-shadow-sm"
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
             >
               ♥
             </motion.div>
           </ScrollReveal>
+          
           <ScrollReveal delay={0.3}>
-            <p className="text-whisper">
-              Dan cerita kita belum berakhir...
-            </p>
+            <Whisper className="text-lg text-purple-accent/70">
+              Dan cerita kita belum berakhir, masih banyak halaman kosong menunggu untuk kita tulis bersama...
+            </Whisper>
           </ScrollReveal>
         </div>
       </section>

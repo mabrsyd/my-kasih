@@ -60,42 +60,42 @@ export const GALLERY_PHOTOS = [
   {
     id: 1,
     title: 'Sunset Together',
-    placeholder: 'bg-gradient-to-br from-soft-pink to-warm-beige',
+    placeholder: 'bg-gradient-to-br from-purple-pale to-purple-light',
   },
   {
     id: 2,
     title: 'Coffee Moments',
-    placeholder: 'bg-gradient-to-br from-warm-beige to-pastel-red',
+    placeholder: 'bg-gradient-to-br from-purple-light to-purple-secondary',
   },
   {
     id: 3,
     title: 'Adventure Awaits',
-    placeholder: 'bg-gradient-to-br from-pastel-red to-soft-pink',
+    placeholder: 'bg-gradient-to-br from-purple-secondary to-purple-pale',
   },
   {
     id: 4,
     title: 'Laughing Together',
-    placeholder: 'bg-gradient-to-br from-cream to-beige',
+    placeholder: 'bg-gradient-to-br from-neutral-off-white to-purple-pale',
   },
   {
     id: 5,
     title: 'Rainy Days',
-    placeholder: 'bg-gradient-to-br from-beige to-soft-pink',
+    placeholder: 'bg-gradient-to-br from-purple-pale to-purple-secondary',
   },
   {
     id: 6,
     title: 'Night Lights',
-    placeholder: 'bg-gradient-to-br from-pastel-red to-warm-beige',
+    placeholder: 'bg-gradient-to-br from-purple-secondary to-purple-light',
   },
   {
     id: 7,
     title: 'Quiet Moments',
-    placeholder: 'bg-gradient-to-br from-cream to-pastel-red',
+    placeholder: 'bg-gradient-to-br from-neutral-off-white to-purple-secondary',
   },
   {
     id: 8,
     title: 'Forever Starts Now',
-    placeholder: 'bg-gradient-to-br from-soft-pink to-beige',
+    placeholder: 'bg-gradient-to-br from-purple-pale to-purple-light',
   },
 ] as const;
 

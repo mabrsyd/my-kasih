@@ -294,4 +294,19 @@ export const letterService = {
       entityId: id,
     });
   },
+
+  async reorder(items: Array<{ id: string; order: number }>, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+    await Promise.all(
+      items.map(item =>
+        letterRepository.update(item.id, { order: item.order })
+      )
+    );
+
+    await logAudit({
+      ...auditData,
+      action: 'UPDATE',
+      entityType: 'Letter',
+      entityId: 'batch',
+    });
+  },
 };

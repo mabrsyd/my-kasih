@@ -2,13 +2,24 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-soft-pink: #f8d7e6;
-  --color-pastel-red: #e6a1a1;
-  --color-beige: #f5f0eb;
-  --color-cream: #faf8f6;
-  --color-romantic-red: #d4757f;
-  --color-warm-beige: #e8dcc8;
-  --color-dark-rose: #a85a6a;
+  --color-purple-primary: #6B3FA0;
+  --color-purple-secondary: #C8A8D8;
+  --color-purple-accent: #9D4E6C;
+  --color-purple-warm: #7B4B7B;
+  --color-purple-light: #D4C5E0;
+  --color-purple-pale: #F0E6F7;
+  --color-neutral-off-white: #F9F7FC;
+  --color-neutral-light: #E8E3F0;
+  --color-neutral-dark: #2A2A2A;
+  
+  /* Legacy support */
+  --color-soft-pink: #F0E6F7;
+  --color-pastel-red: #C8A8D8;
+  --color-beige: #F9F7FC;
+  --color-cream: #F0E6F7;
+  --color-romantic-red: #9D4E6C;
+  --color-warm-beige: #E8E3F0;
+  --color-dark-rose: #9D4E6C;
   
   --font-serif-display: 'Playfair Display', serif;
   --font-serif-body: 'Lora', serif;
@@ -23,7 +34,7 @@ html {
 }
 
 body {
-  background: linear-gradient(135deg, #f8d7e6 0%, #faf8f6 100%);
+  background: linear-gradient(135deg, #F0E6F7 0%, #F9F7FC 100%);
   color: #5a5a5a;
   font-family: 'Lora', serif;
   overflow-x: hidden;
@@ -32,7 +43,7 @@ body {
 
 /* Selection styling */
 ::selection {
-  background-color: #e6a1a1;
+  background-color: #9D4E6C;
   color: white;
 }
 
@@ -101,10 +112,10 @@ body {
 
 @keyframes glow {
   0%, 100% {
-    filter: drop-shadow(0 0 5px rgba(212, 117, 127, 0.3));
+    filter: drop-shadow(0 0 5px rgba(107, 63, 160, 0.3));
   }
   50% {
-    filter: drop-shadow(0 0 15px rgba(212, 117, 127, 0.6));
+    filter: drop-shadow(0 0 15px rgba(157, 78, 108, 0.6));
   }
 }
 
@@ -201,7 +212,7 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 9998;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(248, 215, 230, 0.15) 100%);
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(107, 63, 160, 0.08) 100%);
 }
 
 /* Glass morphism effect */
@@ -215,9 +226,9 @@ body {
 /* Soft shadow for cards */
 .shadow-romantic {
   box-shadow: 
-    0 4px 6px -1px rgba(212, 117, 127, 0.06),
-    0 10px 15px -3px rgba(212, 117, 127, 0.08),
-    0 20px 25px -5px rgba(212, 117, 127, 0.05);
+    0 4px 6px -1px rgba(107, 63, 160, 0.06),
+    0 10px 15px -3px rgba(107, 63, 160, 0.08),
+    0 20px 25px -5px rgba(107, 63, 160, 0.05);
 }
 
 /* Hover glow effect */
@@ -227,8 +238,8 @@ body {
 
 .hover-glow:hover {
   box-shadow: 
-    0 0 20px rgba(212, 117, 127, 0.2),
-    0 0 40px rgba(212, 117, 127, 0.1);
+    0 0 20px rgba(107, 63, 160, 0.2),
+    0 0 40px rgba(107, 63, 160, 0.1);
 }
 
 /* ============================================
@@ -364,7 +375,7 @@ body {
 
 /* Focus states for accessibility */
 :focus-visible {
-  outline: 2px solid #d4757f;
+  outline: 2px solid #9D4E6C;
   outline-offset: 4px;
   border-radius: 4px;
 }
@@ -382,25 +393,25 @@ body {
   font-family: 'Lora', serif;
   font-size: 0.9rem;
   letter-spacing: 0.05em;
-  color: #5a5a5a;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(212, 117, 127, 0.2);
+  color: #2A2A2A;
+  background: rgba(200, 168, 216, 0.15);
+  border: 1px solid rgba(107, 63, 160, 0.2);
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-romantic:hover {
-  background: rgba(212, 117, 127, 0.1);
-  border-color: rgba(212, 117, 127, 0.3);
+  background: rgba(107, 63, 160, 0.1);
+  border-color: rgba(107, 63, 160, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(212, 117, 127, 0.15);
+  box-shadow: 0 8px 20px rgba(107, 63, 160, 0.15);
 }
 
 /* Link underline animation */
 .link-romantic {
   position: relative;
-  color: #a85a6a;
+  color: #9D4E6C;
   text-decoration: none;
 }
 

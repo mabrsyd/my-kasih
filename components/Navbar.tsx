@@ -21,7 +21,7 @@ export default function Navbar() {
       transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
       className={`fixed w-full top-0 z-50 transition-all duration-500 ${
         isScrolled 
-          ? 'bg-white/80 backdrop-blur-lg shadow-romantic border-b border-white/30' 
+          ? 'bg-white/75 backdrop-blur-lg shadow-romantic border-b border-purple-secondary/20' 
           : 'bg-transparent'
       }`}
     >
@@ -33,14 +33,14 @@ export default function Navbar() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.3 }}
-              className="font-serif-display text-xl font-semibold text-dark-rose"
+              className="font-serif-display text-lg font-semibold text-purple-primary"
             >
               {SITE_NAME}
             </motion.div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex gap-10">
+          <div className="hidden md:flex gap-8">
             {NAVIGATION_LINKS.map((link, idx) => (
               <motion.div
                 key={link.id}
@@ -50,10 +50,10 @@ export default function Navbar() {
               >
                 <Link
                   href={link.href}
-                  className="font-serif-body text-sm text-dark-rose/70 hover:text-romantic-red transition-colors duration-300 relative group tracking-wide"
+                  className="font-serif-body text-sm text-purple-primary/70 hover:text-purple-accent transition-colors duration-300 relative group tracking-wide"
                 >
                   {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-romantic-red group-hover:w-full transition-all duration-400 ease-out" />
+                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-purple-accent group-hover:w-full transition-all duration-400 ease-out" />
                 </Link>
               </motion.div>
             ))}
@@ -63,23 +63,23 @@ export default function Navbar() {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-full hover:bg-soft-pink/30 transition-colors"
+            className="md:hidden p-2 rounded-full hover:bg-purple-pale/40 transition-colors"
           >
             <div className="space-y-1.5">
               <motion.div
                 animate={isOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="w-5 h-0.5 bg-romantic-red rounded-full"
+                className="w-5 h-0.5 bg-purple-accent rounded-full"
               />
               <motion.div
                 animate={isOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
                 transition={{ duration: 0.2 }}
-                className="w-5 h-0.5 bg-romantic-red rounded-full"
+                className="w-5 h-0.5 bg-purple-accent rounded-full"
               />
               <motion.div
                 animate={isOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="w-5 h-0.5 bg-romantic-red rounded-full"
+                className="w-5 h-0.5 bg-purple-accent rounded-full"
               />
             </div>
           </motion.button>
@@ -102,7 +102,7 @@ export default function Navbar() {
               >
                 <Link
                   href={link.href}
-                  className="block px-4 py-3 rounded-xl text-dark-rose/80 hover:bg-soft-pink/30 hover:text-romantic-red transition-all duration-300"
+                  className="block px-4 py-3 rounded-xl text-purple-primary/75 hover:bg-purple-pale/40 hover:text-purple-accent transition-all duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.label}

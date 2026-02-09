@@ -182,14 +182,14 @@ export const paragraphRevealVariants: Variants = {
   }),
 };
 
-// Soft glow hover effect
+// Soft glow hover effect (updated to purple)
 export const glowHoverVariants = {
   rest: { 
-    boxShadow: '0 0 0 rgba(212, 117, 127, 0)',
+    boxShadow: '0 0 0 rgba(107, 63, 160, 0)',
     scale: 1,
   },
   hover: { 
-    boxShadow: '0 0 25px rgba(212, 117, 127, 0.25)',
+    boxShadow: '0 0 25px rgba(107, 63, 160, 0.25)',
     scale: 1.02,
     transition: { duration: 0.4, ease: 'easeInOut' },
   },
@@ -264,3 +264,75 @@ export const galleryImageVariants: Variants = {
   },
 };
 
+// ============================================
+// PURPLE ROMANTIC CARD & INTERACTION VARIANTS
+// ============================================
+
+// Card hover with purple glow
+export const cardHoverVariants = {
+  rest: {
+    y: 0,
+    boxShadow: '0 4px 6px rgba(107, 63, 160, 0.05)',
+    scale: 1,
+  },
+  hover: {
+    y: -4,
+    boxShadow: '0 12px 24px rgba(107, 63, 160, 0.15)',
+    scale: 1.02,
+    transition: { duration: 0.3, ease: 'easeOut' },
+  },
+};
+
+// Image reveal on scroll
+export const imageRevealVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
+  },
+};
+
+// Letter content reveal (for letter page)
+export const letterContentVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: delay * 0.1,
+      duration: 0.7,
+      ease: [0.4, 0, 0.2, 1],
+    },
+  }),
+};
+
+// Timeline item appear from bottom
+export const timelineItemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: delay * 0.12,
+      duration: 0.6,
+      ease: [0.4, 0, 0.2, 1],
+    },
+  }),
+};
+
+// Purple accent glow animation (for decorative elements)
+export const purpleGlowVariants: Variants = {
+  animate: {
+    boxShadow: [
+      '0 0 0 rgba(107, 63, 160, 0)',
+      '0 0 15px rgba(107, 63, 160, 0.3)',
+      '0 0 0 rgba(107, 63, 160, 0)',
+    ],
+    transition: {
+      duration: 3,
+      repeat: Infinity,
+      ease: 'easeInOut',
+    },
+  },
+};

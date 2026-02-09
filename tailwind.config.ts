@@ -8,12 +8,27 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'soft-pink': '#f8d7e6',
-        'pastel-red': '#e6a1a1',
-        'beige': '#f5f0eb',
-        'cream': '#faf8f6',
-        'romantic-red': '#d4757f',
-        'warm-beige': '#e8dcc8',
+        // Purple Romantic Palette
+        'purple-primary': '#6B3FA0',      // Deep Purple
+        'purple-secondary': '#C8A8D8',    // Soft Lavender
+        'purple-accent': '#9D4E6C',       // Rose Purple
+        'purple-warm': '#7B4B7B',         // Warm Plum
+        'purple-light': '#D4C5E0',        // Light Lavender
+        'purple-pale': '#F0E6F7',         // Very Light Purple
+        'purple-dark': '#4A2A6B',         // Dark Purple
+        
+        // Neutrals
+        'neutral-off-white': '#F9F7FC',
+        'neutral-light': '#E8E3F0',
+        'neutral-dark': '#2A2A2A',
+        
+        // Legacy support (remapped to purple)
+        'soft-pink': '#F0E6F7',
+        'pastel-red': '#C8A8D8',
+        'beige': '#F9F7FC',
+        'cream': '#F0E6F7',
+        'romantic-red': '#9D4E6C',
+        'warm-beige': '#E8E3F0',
       },
       fontFamily: {
         'serif-display': ['var(--font-playfair)', 'serif'],
@@ -53,9 +68,10 @@ const config: Config = {
         },
       },
       backgroundImage: {
-        'gradient-romantic': 'linear-gradient(135deg, #f8d7e6 0%, #faf8f6 100%)',
-        'gradient-warm': 'linear-gradient(135deg, #f5f0eb 0%, #faf8f6 100%)',
-        'gradient-rose': 'linear-gradient(135deg, #f8d7e6 0%, #e6a1a1 100%)',
+        'gradient-romantic': 'linear-gradient(135deg, #F0E6F7 0%, #F9F7FC 100%)',
+        'gradient-warm': 'linear-gradient(135deg, #E8E3F0 0%, #F9F7FC 100%)',
+        'gradient-rose': 'linear-gradient(135deg, #9D4E6C 0%, #C8A8D8 100%)',
+        'gradient-purple': 'linear-gradient(135deg, #6B3FA0 0%, #9D4E6C 100%)',
       },
     },
   },

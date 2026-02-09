@@ -62,61 +62,92 @@ export default function MusicPlayer() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.5 }}
-      className="fixed bottom-6 right-6 z-40 bg-white/80 backdrop-blur-md rounded-full shadow-lg p-4 border border-white/50"
+      className="fixed bottom-6 right-6 z-40"
     >
       {/* Hidden audio element */}
       <audio
         ref={audioRef}
-        src="/music/romantic-instrumental.mp3"
+        src="/music/pamungkas-monolog.mp3"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}
         loop
       />
 
-      <div className="flex items-center gap-3">
+      {/* Cassette Tape Design */}
+      <div className="w-40 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-lg p-4 shadow-2xl border-2 border-gray-700 hover:border-purple-500 transition-colors">
+        {/* Cassette Label */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded px-2 py-1 mb-3 text-center">
+          <p className="text-white text-xs font-bold tracking-wider">♫ LOVE ♫</p>
+        </div>
+
+        {/* Spinning Reels */}
+        <div className="flex justify-between items-center mb-4 gap-3">
+          {/* Left Reel */}
+          <motion.div
+            animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            className="w-12 h-12 rounded-full border-4 border-gray-600 flex items-center justify-center bg-gray-700/50"
+          >
+            <div className="w-6 h-6 rounded-full border-2 border-gray-500 flex items-center justify-center">
+              <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+            </div>
+          </motion.div>
+
+          {/* Right Reel */}
+          <motion.div
+            animate={isPlaying ? { rotate: -360 } : { rotate: 0 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            className="w-12 h-12 rounded-full border-4 border-gray-500 flex items-center justify-center bg-gray-700/50"
+          >
+            <div className="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center">
+              <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Tape Display */}
+        <div className="bg-black rounded px-2 py-2 mb-3 border border-gray-700">
+          <div className="flex justify-between items-center gap-2">
+            <span className="text-xs text-purple-400 font-mono font-bold">
+              {formatTime(currentTime)}
+            </span>
+            <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                style={{
+                  width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+                }}
+              />
+            </div>
+            <span className="text-xs text-purple-400 font-mono font-bold">
+              {formatTime(duration)}
+            </span>
+          </div>
+        </div>
+
         {/* Play/Pause Button */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={togglePlayPause}
-          className="text-xl hover:text-romantic-red transition-colors"
+          className="w-full py-2 px-3 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white font-bold rounded transition-all shadow-lg flex items-center justify-center gap-2"
           title={isPlaying ? 'Pause' : 'Play'}
         >
-          {isPlaying ? '⏸️' : '▶️'}
+          <span className="text-lg">
+            {isPlaying ? '⏸' : '▶'}
+          </span>
+          <span className="text-sm">
+            {isPlaying ? 'Playing' : 'Play'}
+          </span>
         </motion.button>
 
-        {/* Time Info */}
-        <div className="text-xs text-gray-600 min-w-12 text-center">
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </div>
-
-        {/* Progress Bar */}
-        <div className="hidden sm:block w-24 h-1 bg-gray-200 rounded-full cursor-pointer group overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-romantic-red to-pastel-red rounded-full"
-            style={{
-              width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
-            }}
-          />
-        </div>
-
-        {/* Volume/Info */}
-        <div className="text-sm font-serif-body text-gray-600 hidden md:block">
-          🎵
+        {/* Cassette Details */}
+        <div className="mt-3 text-center text-xs text-gray-400 font-mono">
+          <p>Rosyid & Ennou</p>
+          <p className="text-purple-400">♥ Forever ♥</p>
         </div>
       </div>
-
-      {/* Animated music note indicator */}
-      {isPlaying && (
-        <motion.div
-          className="absolute -top-8 -right-2 text-lg"
-          animate={{ y: [0, -5, 0] }}
-          transition={{ duration: 1, repeat: Infinity }}
-        >
-          ♪
-        </motion.div>
-      )}
     </motion.div>
   );
 }

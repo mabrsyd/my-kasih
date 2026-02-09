@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 
 interface MediaUploaderProps {
-  onSuccess: (url: string, fileName: string) => void;
+  onSuccess: (mediaId: string, url: string, fileName: string) => void;
   onError?: (error: string) => void;
   accept?: string;
 }
@@ -43,7 +43,7 @@ export function MediaUploader({
       }
 
       const data = await response.json();
-      onSuccess(data.publicUrl, file.name);
+      onSuccess(data.id, data.publicUrl, file.name);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Upload failed';

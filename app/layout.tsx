@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import HeartCursor from '@/components/HeartCursor';
 import MusicPlayer from '@/components/MusicPlayer';
+import RomanticBackground from '@/components/RomanticBackground';
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '@/lib/constants';
 
 const playfair = Playfair_Display({
@@ -57,6 +58,7 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${lora.variable} antialiased`}
       >
+        <RomanticBackground />
         <HeartCursor />
         <Navbar />
         <main className="pt-16 min-h-screen">

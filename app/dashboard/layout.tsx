@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { simpleAuth } from '@/lib/auth/simple';
+import { ToastProvider } from '@/components/dashboard';
 
 export default function DashboardLayout({
   children,
@@ -108,6 +109,7 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <ToastProvider />
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}

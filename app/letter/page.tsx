@@ -2,11 +2,18 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { ParagraphReveal } from '@/components/ScrollReveal';
 import MomentOfSilence from '@/components/MomentOfSilence';
-import { cinematicFadeVariants, whisperVariants } from '@/lib/animations';
+import { 
+  cinematicFadeVariants, 
+  whisperVariants,
+  letterContentVariants 
+} from '@/lib/animations';
+import { H1, P, Whisper } from '@/components/ui/Typography';
 
 export default function Letter() {
+  const router = useRouter();
   const letterRef = useRef(null);
   const isLetterInView = useInView(letterRef, { once: true, margin: "-10%" });
 
@@ -32,55 +39,53 @@ export default function Letter() {
       <div className="vignette" />
 
       {/* Hero section - Emotional opening */}
-      <section className="min-h-screen flex items-center justify-center section-breathe pt-24 relative">
+      <section className="min-h-screen flex items-center justify-center pt-32 pb-16 md:pb-24 relative">
         <motion.div
           variants={cinematicFadeVariants}
-          initial="initial"
-          animate="animate"
-          className="text-center content-intimate"
+          initial="hidden"
+          animate="visible"
+          className="text-center content-intimate px-4"
         >
           {/* Decorative envelope */}
           <motion.div
-            initial={{ scale: 0.8, opacity: 0, rotateX: 20 }}
-            animate={{ scale: 1, opacity: 0.7, rotateX: 0 }}
+            initial={{ scale: 0.6, opacity: 0, rotateY: -20 }}
+            animate={{ scale: 1, opacity: 0.6, rotateY: 0 }}
             transition={{ duration: 1.5, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className="text-6xl mb-12"
+            onClick={() => router.push('/flower-animation')}
+            className="text-6xl md:text-7xl mb-10 filter drop-shadow-sm cursor-pointer hover:opacity-100 transition-opacity group"
           >
-            ✉
+            <motion.span
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              className="group-hover:scale-125 transition-transform inline-block"
+            >
+              ✉
+            </motion.span>
           </motion.div>
 
-          <motion.h1
-            className="text-poetry text-dark-rose mb-8"
-            variants={whisperVariants}
-            initial="initial"
-            animate="animate"
-          >
-            Surat Untukmu
-          </motion.h1>
+          <H1 className="mb-6 text-purple-primary">Surat Untukmu</H1>
 
-          <motion.p
-            className="text-intimate mb-16 max-w-md mx-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 1 }}
-          >
+          <P className="mb-12 max-w-lg mx-auto text-purple-warm opacity-90 text-lg">
             Kata-kata dari hatiku yang terdalam,<br />
-            ditulis hanya untukmu...
-          </motion.p>
+            <span className="text-sm opacity-75">ditulis hanya untukmu...</span>
+          </P>
 
           {/* Scroll indicator */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             transition={{ delay: 2, duration: 1 }}
+            className="mt-8"
           >
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-              className="text-dark-rose/50 text-center"
+              className="text-purple-accent/40"
             >
-              <p className="text-whisper mb-2 text-xs tracking-widest uppercase">Baca</p>
-              <span className="text-lg">↓</span>
+              <Whisper className="block text-xs tracking-widest uppercase mb-2">
+                Baca Surat
+              </Whisper>
+              <span className="text-2xl">↓</span>
             </motion.div>
           </motion.div>
         </motion.div>
@@ -88,57 +93,72 @@ export default function Letter() {
 
       {/* Letter content - paragraph by paragraph reveal */}
       <section className="section-breathe" ref={letterRef}>
-        <div className="max-w-xl mx-auto px-6">
+        <div className="max-w-2xl mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={isLetterInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="glass rounded-3xl p-8 md:p-12 shadow-romantic"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isLetterInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="bg-white/70 backdrop-blur-md border border-l-4 border-purple-secondary rounded-2xl p-8 md:p-12 shadow-romantic border-l-purple-accent"
           >
             {/* Opening salutation */}
             <motion.p
-              className="text-handwritten text-xl text-romantic-red mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={isLetterInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-handwritten text-lg text-purple-accent mb-8 font-serif-body"
+              initial={{ opacity: 0, y: 10 }}
+              animate={isLetterInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
             >
               {letterParagraphs[0]}
             </motion.p>
 
             {/* Main paragraphs with stagger */}
-            <ParagraphReveal 
-              paragraphs={letterParagraphs.slice(1, -1)}
-              staggerDelay={0.4}
-              paragraphClassName="text-intimate"
-            />
+            <div className="space-y-6">
+              {letterParagraphs.slice(1, -1).map((paragraph, index) => (
+                <motion.p
+                  key={index}
+                  className="text-intimate text-neutral-dark leading-relaxed"
+                  custom={index}
+                  variants={letterContentVariants}
+                  initial="hidden"
+                  animate={isLetterInView ? "visible" : "hidden"}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                >
+                  {paragraph}
+                </motion.p>
+              ))}
+            </div>
 
             {/* Closing paragraph - special styling */}
             <motion.p
-              className="text-handwritten text-lg text-romantic-red mt-10 italic"
-              initial={{ opacity: 0, y: 20 }}
+              className="text-handwritten text-lg text-purple-accent mt-10 italic font-serif-body"
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 1, delay: 0.5 }}
+              transition={{ duration: 0.9, delay: 0.6 }}
             >
               {letterParagraphs[letterParagraphs.length - 1]}
             </motion.p>
 
-            {/* Signature */}
+            {/* Signature section */}
             <motion.div
-              className="mt-12 text-center"
+              className="mt-12 pt-8 border-t border-purple-secondary/30 text-center"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 1, delay: 0.8 }}
+              transition={{ duration: 0.9, delay: 0.8 }}
             >
-              <p className="text-whisper mb-4 uppercase tracking-widest text-xs">Selamanya milikmu</p>
+              <Whisper className="block mb-6 uppercase tracking-widest text-xs text-purple-warm/70">
+                Dengan sepenuh hati,
+              </Whisper>
               <motion.span 
-                className="text-4xl"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className="text-5xl inline-block filter drop-shadow-sm"
+                animate={{ scale: [1, 1.12, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               >
                 ♥
               </motion.span>
+              <p className="text-sm text-purple-accent mt-4 font-serif-body italic">
+                Selamanya milikmu
+              </p>
             </motion.div>
           </motion.div>
         </div>
@@ -149,25 +169,27 @@ export default function Letter() {
         quote="Baca surat ini setiap kali kamu perlu diingatkan betapa berartinya dirimu bagiku"
       />
 
-      {/* Final moment */}
+      {/* Final message */}
       <section className="section-breathe">
-        <div className="content-intimate text-center">
+        <div className="content-intimate text-center px-4">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.8 }}
+            onClick={() => router.push('/flower-animation')}
+            className="cursor-pointer group"
           >
             <motion.span 
-              className="text-5xl block mb-8"
-              animate={{ y: [0, -5, 0] }}
+              className="text-6xl block mb-6 drop-shadow-sm group-hover:scale-110 transition-transform"
+              animate={{ y: [0, -6, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
               ✉
             </motion.span>
-            <p className="text-whisper">
+            <Whisper className="text-lg text-purple-warm/80 group-hover:text-purple-warm transition-colors">
               Dengan cinta tak terbatas...
-            </p>
+            </Whisper>
           </motion.div>
         </div>
       </section>
