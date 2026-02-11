@@ -13,25 +13,7 @@ import {
   LetterInput,
   LetterUpdateInput,
 } from '@/lib/validators/content';
-import { prisma } from '@/lib/prisma';
-
-interface AuditLog {
-  action: string;
-  entityType: string;
-  entityId: string;
-  ipAddress: string;
-  userAgent: string;
-}
-
-async function logAudit(log: AuditLog) {
-  try {
-    await prisma.auditLog.create({
-      data: log,
-    });
-  } catch (error) {
-    console.error('[SERVICE] Failed to log audit:', error);
-  }
-}
+import { logAudit, type AuditContext } from '@/lib/audit';
 
 // ============================================
 // Memory Service
@@ -52,7 +34,7 @@ export const memoryService = {
     return memory;
   },
 
-  async create(data: MemoryInput, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async create(data: MemoryInput, auditData: AuditContext) {
     const validated = memorySchema.parse(data);
     const memory = await memoryRepository.create({
       date: new Date(validated.date),
@@ -76,7 +58,7 @@ export const memoryService = {
   async update(
     id: string,
     data: MemoryUpdateInput,
-    auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>
+    auditData: AuditContext
   ) {
     await this.getById(id); // Verify exists
     const validated = memoryPartialSchema.parse(data);
@@ -97,7 +79,7 @@ export const memoryService = {
     return memory;
   },
 
-  async delete(id: string, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async delete(id: string, auditData: AuditContext) {
     await this.getById(id); // Verify exists
     await memoryRepository.delete(id);
 
@@ -125,7 +107,7 @@ export const galleryService = {
     return gallery;
   },
 
-  async create(data: GalleryInput, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async create(data: GalleryInput, auditData: AuditContext) {
     const validated = gallerySchema.parse(data);
 
     // Verify image exists
@@ -152,7 +134,7 @@ export const galleryService = {
   async update(
     id: string,
     data: GalleryUpdateInput,
-    auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>
+    auditData: AuditContext
   ) {
     await this.getById(id); // Verify exists
     const validated = galleryPartialSchema.parse(data);
@@ -179,7 +161,7 @@ export const galleryService = {
     return gallery;
   },
 
-  async delete(id: string, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async delete(id: string, auditData: AuditContext) {
     await this.getById(id); // Verify exists
     await galleryRepository.delete(id);
 
@@ -191,7 +173,7 @@ export const galleryService = {
     });
   },
 
-  async reorder(items: Array<{ id: string; order: number }>, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async reorder(items: Array<{ id: string; order: number }>, auditData: AuditContext) {
     await Promise.all(
       items.map(item =>
         galleryRepository.update(item.id, { order: item.order })
@@ -226,7 +208,7 @@ export const letterService = {
     return letter;
   },
 
-  async create(data: LetterInput, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async create(data: LetterInput, auditData: AuditContext) {
     const validated = letterSchema.parse(data);
 
     if (validated.imageId) {
@@ -255,7 +237,7 @@ export const letterService = {
   async update(
     id: string,
     data: LetterUpdateInput,
-    auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>
+    auditData: AuditContext
   ) {
     await this.getById(id); // Verify exists
     const validated = letterPartialSchema.parse(data);
@@ -283,7 +265,7 @@ export const letterService = {
     return letter;
   },
 
-  async delete(id: string, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async delete(id: string, auditData: AuditContext) {
     await this.getById(id); // Verify exists
     await letterRepository.delete(id);
 
@@ -295,7 +277,7 @@ export const letterService = {
     });
   },
 
-  async reorder(items: Array<{ id: string; order: number }>, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async reorder(items: Array<{ id: string; order: number }>, auditData: AuditContext) {
     await Promise.all(
       items.map(item =>
         letterRepository.update(item.id, { order: item.order })

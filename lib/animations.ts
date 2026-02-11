@@ -1,57 +1,12 @@
 import { Variants } from 'framer-motion';
 
 // ============================================
-// CORE ANIMATION PHILOSOPHY:
-// - All easing: "easeInOut" for human-like feel
-// - Subtle delays (0.1-0.3s) for breathing room
-// - No bounce, no overshoot, gentle & intimate
+// ANIMATION VARIANTS
+// Philosophy: subtle, gentle, intimate
+// All easing: "easeInOut" for human-like feel
 // ============================================
 
-export const fadeInUpVariants: Variants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: 'easeInOut', delay: 0.1 },
-  },
-};
-
-export const fadeInDownVariants: Variants = {
-  hidden: { opacity: 0, y: -15 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: 'easeInOut', delay: 0.1 },
-  },
-};
-
-export const slideInLeftVariants: Variants = {
-  hidden: { opacity: 0, x: -30 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.7, ease: 'easeInOut', delay: 0.15 },
-  },
-};
-
-export const slideInRightVariants: Variants = {
-  hidden: { opacity: 0, x: 30 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.7, ease: 'easeInOut', delay: 0.15 },
-  },
-};
-
-export const scaleInVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.6, ease: 'easeInOut' },
-  },
-};
-
+/** Stagger container for list/grid reveals */
 export const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -64,6 +19,7 @@ export const containerVariants: Variants = {
   },
 };
 
+/** Individual item reveal (used in grids, lists) */
 export const itemVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
   visible: {
@@ -73,90 +29,7 @@ export const itemVariants: Variants = {
   },
 };
 
-export const floatVariants: Variants = {
-  animate: {
-    y: [0, -10, 0],
-    transition: {
-      duration: 5,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
-};
-
-export const heartBeatVariants: Variants = {
-  animate: {
-    scale: [1, 1.08, 1],
-    transition: {
-      duration: 2,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
-};
-
-export const pulseVariants: Variants = {
-  animate: {
-    opacity: [0.5, 0.8, 0.5],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
-};
-
-export const staggerContainerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.15,
-      ease: 'easeInOut',
-    },
-  },
-};
-
-export const revealVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay,
-      duration: 0.7,
-      ease: [0.23, 1, 0.320, 1],
-    },
-  }),
-};
-
-export const typewriterVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.1 },
-  },
-};
-
-export const hoverScaleVariants = {
-  rest: { scale: 1 },
-  hover: {
-    scale: 1.03,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
-
-export const tapScaleVariants = {
-  initial: { scale: 1 },
-  tap: { scale: 0.98 },
-};
-
-// ============================================
-// PREMIUM EMOTIONAL ANIMATIONS
-// ============================================
-
-// Gentle breathing animation - for subtle life
+/** Gentle breathing pulse for subtle emphasis */
 export const breatheVariants: Variants = {
   animate: {
     scale: [1, 1.015, 1],
@@ -168,46 +41,7 @@ export const breatheVariants: Variants = {
   },
 };
 
-// Paragraph-by-paragraph reveal for love letter
-export const paragraphRevealVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay,
-      duration: 0.9,
-      ease: 'easeInOut',
-    },
-  }),
-};
-
-// Soft glow hover effect (updated to purple)
-export const glowHoverVariants = {
-  rest: { 
-    boxShadow: '0 0 0 rgba(107, 63, 160, 0)',
-    scale: 1,
-  },
-  hover: { 
-    boxShadow: '0 0 25px rgba(107, 63, 160, 0.25)',
-    scale: 1.02,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
-
-// Very slow float for background elements
-export const slowFloatVariants: Variants = {
-  animate: {
-    y: [0, -8, 0],
-    transition: {
-      duration: 8,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
-};
-
-// Cinematic fade for modals/overlays
+/** Cinematic fade-in with slight scale */
 export const cinematicFadeVariants: Variants = {
   hidden: { opacity: 0, scale: 0.97 },
   visible: {
@@ -222,7 +56,7 @@ export const cinematicFadeVariants: Variants = {
   },
 };
 
-// Whisper text - very subtle fade
+/** Subtle whisper text appearance */
 export const whisperVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -231,69 +65,17 @@ export const whisperVariants: Variants = {
   },
 };
 
-// Moment of silence - slow dramatic reveal
-export const momentRevealVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 1.5, ease: 'easeInOut' },
-  },
-};
-
-// Timeline memory card hover
+/** Memory card entrance animation */
 export const memoryCardVariants: Variants = {
-  initial: { 
-    y: 0,
-    opacity: 0,
-  },
-  animate: { 
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
-  },
-};
-
-// Gallery image hover
-export const galleryImageVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: { 
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-  },
-};
-
-// ============================================
-// PURPLE ROMANTIC CARD & INTERACTION VARIANTS
-// ============================================
-
-// Card hover with purple glow
-export const cardHoverVariants = {
-  rest: {
-    y: 0,
-    boxShadow: '0 4px 6px rgba(107, 63, 160, 0.05)',
-    scale: 1,
-  },
-  hover: {
-    y: -4,
-    boxShadow: '0 12px 24px rgba(107, 63, 160, 0.15)',
-    scale: 1.02,
-    transition: { duration: 0.3, ease: 'easeOut' },
-  },
-};
-
-// Image reveal on scroll
-export const imageRevealVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.96 },
+  hidden: { y: 0, opacity: 0 },
   visible: {
+    y: 0,
     opacity: 1,
-    scale: 1,
     transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
   },
 };
 
-// Letter content reveal (for letter page)
+/** Letter content paragraph-by-paragraph reveal */
 export const letterContentVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: (delay = 0) => ({
@@ -307,21 +89,7 @@ export const letterContentVariants: Variants = {
   }),
 };
 
-// Timeline item appear from bottom
-export const timelineItemVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: delay * 0.12,
-      duration: 0.6,
-      ease: [0.4, 0, 0.2, 1],
-    },
-  }),
-};
-
-// Purple accent glow animation (for decorative elements)
+/** Purple accent glow for decorative elements */
 export const purpleGlowVariants: Variants = {
   animate: {
     boxShadow: [

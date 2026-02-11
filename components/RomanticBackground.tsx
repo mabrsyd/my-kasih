@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import React from 'react';
 
 // Modern elegant flower variations
@@ -182,6 +182,11 @@ interface FloatingElement {
 export default function RomanticBackground() {
   // Subtle, elegant color palette - soft warm tones
   const heartColors = ['#fbbf24', '#fcd34d', '#fef3c7'];
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Generate random floating elements - minimal aesthetic
   const floatingElements: FloatingElement[] = useMemo(() => {
@@ -230,6 +235,7 @@ export default function RomanticBackground() {
         style={{
           background: 'linear-gradient(180deg, #fafaf9 0%, #f5f3f0 50%, #faf9f7 100%)',
         }}
+        suppressHydrationWarning
       />
 
       {/* Subtle warm accent - minimal overlay */}
@@ -238,11 +244,12 @@ export default function RomanticBackground() {
         style={{
           background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(251, 146, 60, 0.05) 0%, transparent 70%)',
         }}
+        suppressHydrationWarning
       />
 
       {/* Animated colorful elements container */}
       <div className="fixed inset-0 -z-40 pointer-events-none overflow-hidden" suppressHydrationWarning>
-        {floatingElements.map((element) => {
+        {isMounted && floatingElements.map((element) => {
           const FlowerComponent =
             element.type === 'flower'
               ? element.flowerType === 1
@@ -289,6 +296,7 @@ export default function RomanticBackground() {
         style={{
           background: 'radial-gradient(ellipse at center, transparent 0%, rgba(120, 113, 108, 0.02) 100%)',
         }}
+        suppressHydrationWarning
       />
 
       {/* CSS animation support for reduced motion */}

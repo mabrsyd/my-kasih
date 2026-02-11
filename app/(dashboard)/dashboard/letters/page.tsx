@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useFetch } from '@/hooks';
+import { useFetch, useUnsavedChanges, UnsavedChangesIndicator, useAutoSaveDraft } from '@/hooks';
 import {
   ConfirmDialog,
   MediaUploader,
@@ -9,6 +9,10 @@ import {
   SearchInput,
   Pagination,
   LoadingSpinner,
+  DetailView,
+  StatusBadge,
+  PublishToggle,
+  DashboardEmptyState,
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -30,6 +34,7 @@ export default function LettersPage() {
   const [filteredLetters, setFilteredLetters] = useState<Letter[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -49,7 +54,18 @@ export default function LettersPage() {
     published: false,
   });
 
+  // Track form changes
+  const [originalFormData, setOriginalFormData] = useState(formData);
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(originalFormData) && showForm;
+  const { showWarning } = useUnsavedChanges({ isDirty });
+  const { clearDraft } = useAutoSaveDraft({
+    key: editingId || 'new-letter',
+    data: formData,
+    enabled: isDirty,
+  });
+
   const { fetch: fetchLetters } = useFetch<Letter[]>('/api/letters');
+  const viewingItem = viewingId ? letters.find((l) => l.id === viewingId) : null;
 
   useEffect(() => {
     loadLetters();
@@ -119,8 +135,10 @@ export default function LettersPage() {
       setShowForm(false);
       setEditingId(null);
       setFormData({ title: '', content: '', published: false });
+      setOriginalFormData({ title: '', content: '', published: false });
       setSelectedImage(null);
       setImageId(null);
+      clearDraft();
       toast.success(editingId ? 'Letter updated!' : 'Letter created!');
     } catch (error) {
       console.error('Error saving letter:', error);
@@ -157,11 +175,13 @@ export default function LettersPage() {
   };
 
   const handleEdit = (letter: Letter) => {
-    setFormData({
+    const newFormData = {
       title: letter.title,
       content: letter.content,
       published: letter.published,
-    });
+    };
+    setFormData(newFormData);
+    setOriginalFormData(newFormData);
     setSelectedImage(letter.image?.publicUrl || null);
     setImageId(letter.imageId || null);
     setEditingId(letter.id);
@@ -472,13 +492,28 @@ export default function LettersPage() {
       {/* List with Drag-Drop */}
       <div className="space-y-4">
         {paginatedLetters.length === 0 ? (
-          <div className="text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
-            <p className="text-slate-500 text-lg">
-              {searchQuery || filterPublished !== 'all'
-                ? 'No letters match your filters'
-                : 'No letters yet. Write one!'}
-            </p>
-          </div>
+          <DashboardEmptyState
+            icon={searchQuery || filterPublished !== 'all' ? '🔍' : '✉️'}
+            title={searchQuery || filterPublished !== 'all' ? 'No letters found' : 'No letters yet'}
+            description={
+              searchQuery || filterPublished !== 'all'
+                ? 'No letters match your current filters. Try adjusting your search or filters.'
+                : 'Write your first love letter to share your heartfelt words.'
+            }
+            actionLabel={searchQuery || filterPublished !== 'all' ? undefined : '➕ Write First Letter'}
+            onAction={
+              searchQuery || filterPublished !== 'all'
+                ? undefined
+                : () => {
+                    setEditingId(null);
+                    setFormData({ title: '', content: '', published: false });
+                    setOriginalFormData({ title: '', content: '', published: false });
+                    setSelectedImage(null);
+                    setImageId(null);
+                    setShowForm(true);
+                  }
+            }
+          />
         ) : (
           <SortableGrid
             items={paginatedLetters}
@@ -518,20 +553,17 @@ export default function LettersPage() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3 className="text-lg font-bold text-slate-900">
                             {letter.title}
                           </h3>
-                          {letter.published ? (
-                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">
-                              ✓ Published
-                            </span>
-                          ) : (
-                            <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded">
-                              Draft
-                            </span>
-                          )}
+                          <PublishToggle
+                            id={letter.id}
+                            published={letter.published}
+                            endpoint="/api/letters"
+                            onSuccess={() => loadLetters()}
+                          />
                         </div>
                         <p className="text-slate-600 text-sm line-clamp-2">
                           {letter.content}
@@ -539,17 +571,14 @@ export default function LettersPage() {
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button
-                          onClick={() => handleTogglePublish(letter)}
-                          className="px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
-                          title={letter.published ? 'Unpublish' : 'Publish'}
+                          onClick={() => setViewingId(letter.id)}
+                          className="px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1"
                         >
-                          {letter.published ? '📪' : '📬'}
-                        </button>
-                        <button
-                          onClick={() => handleEdit(letter)}
-                          className="px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
-                        >
-                          Edit
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          View
                         </button>
                         <button
                           onClick={() => {
@@ -558,7 +587,7 @@ export default function LettersPage() {
                           }}
                           className="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                         >
-                          Delete
+                          🗑️
                         </button>
                       </div>
                     </div>
@@ -605,6 +634,30 @@ export default function LettersPage() {
         onConfirm={handleBatchDelete}
         onCancel={() => setShowBatchConfirm(false)}
       />
+
+      {/* Detail View */}
+      {viewingItem && (
+        <DetailView
+          isOpen={!!viewingItem}
+          onClose={() => setViewingId(null)}
+          title={viewingItem.title}
+          imageUrl={viewingItem.image?.publicUrl}
+          publicUrl={`/letter#${viewingItem.id}`}
+          fields={[
+            { label: 'Content', value: viewingItem.content, fullWidth: true },
+            { label: 'Status', value: viewingItem.published, type: 'boolean' },
+            { label: 'Display Order', value: `Position #${viewingItem.order + 1}` },
+          ]}
+          onEdit={() => handleEdit(viewingItem)}
+          onDelete={() => {
+            setDeleteId(viewingItem.id);
+            setShowConfirm(true);
+          }}
+        />
+      )}
+
+      {/* Unsaved Changes Warning */}
+      <UnsavedChangesIndicator show={showWarning} />
     </div>
   );
 }

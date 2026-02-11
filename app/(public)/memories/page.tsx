@@ -1,14 +1,47 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import LoveTimeline from '@/components/LoveTimeline';
-import { MEMORIES_DATA } from '@/lib/constants';
 import MomentOfSilence from '@/components/MomentOfSilence';
 import ScrollReveal from '@/components/ScrollReveal';
 import { cinematicFadeVariants, purpleGlowVariants } from '@/lib/animations';
 import { H1, P, Whisper } from '@/components/ui/Typography';
+import { RomanticLoader } from '@/components/dashboard/RomanticLoaders';
+import { EmptyState } from '@/components/dashboard/EmptyState';
+
+interface MemoryItem {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+  emoji: string;
+  cover?: {
+    publicUrl: string;
+  };
+}
 
 export default function Memories() {
+  const [memories, setMemories] = useState<MemoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/public/memories')
+      .then((res) => res.json())
+      .then((data) => setMemories(data))
+      .catch(() => setMemories([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Map DB data to LoveTimeline format
+  const timelineItems = memories.map((m) => ({
+    id: m.id,
+    date: m.date,
+    title: m.title,
+    description: m.description,
+    emoji: m.emoji,
+  }));
+
   return (
     <div className="relative">
       {/* Grain overlay */}
@@ -22,7 +55,7 @@ export default function Memories() {
           animate="visible"
           className="text-center content-intimate px-4"
         >
-          <motion.span 
+          <motion.span
             className="text-5xl md:text-6xl block mb-8 text-purple-secondary opacity-40"
             initial={{ scale: 0.6, opacity: 0 }}
             variants={purpleGlowVariants}
@@ -30,11 +63,12 @@ export default function Memories() {
           >
             ✦
           </motion.span>
-          
+
           <H1 className="mb-6 text-purple-primary">Kenangan Indah</H1>
-          
+
           <P className="max-w-lg mx-auto text-lg text-purple-warm opacity-90">
-            Setiap momen bersamamu adalah harta yang kusimpan selamanya dalam perjalanan waktu
+            Setiap momen bersamamu adalah harta yang kusimpan selamanya dalam
+            perjalanan waktu
           </P>
         </motion.div>
       </section>
@@ -42,14 +76,24 @@ export default function Memories() {
       {/* Timeline section */}
       <section className="section-breathe">
         <div className="max-w-5xl mx-auto px-4">
-          <LoveTimeline items={MEMORIES_DATA} />
+          {loading ? (
+            <RomanticLoader message="Mengingat kembali momen indah..." />
+          ) : timelineItems.length === 0 ? (
+            <EmptyState
+              icon="✦"
+              title="Kenangan Sedang Disusun"
+              description="Setiap kenangan sedang kami rangkai dengan penuh kasih. Seperti bunga yang mekar di musimnya, cerita indah memerlukan waktu untuk tumbuh sempurna."
+              actionLabel="← Kembali ke Beranda"
+              actionHref="/"
+            />
+          ) : (
+            <LoveTimeline items={timelineItems} />
+          )}
         </div>
       </section>
 
       {/* Emotional pause */}
-      <MomentOfSilence 
-        quote="Kenangan kita adalah harta lebih berharga dari emas, cerita lebih indah dari dongeng manapun"
-      />
+      <MomentOfSilence quote="Kenangan kita adalah harta lebih berharga dari emas, cerita lebih indah dari dongeng manapun" />
 
       {/* Closing section */}
       <section className="section-breathe">
@@ -58,12 +102,16 @@ export default function Memories() {
             <motion.div
               className="text-6xl mb-8 text-purple-secondary opacity-40"
               animate={{ y: [0, -8, 0], scale: [1, 1.08, 1] }}
-              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{
+                duration: 4.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
             >
               ∞
             </motion.div>
           </ScrollReveal>
-          
+
           <ScrollReveal delay={0.3}>
             <Whisper className="text-lg text-purple-accent/70">
               Dan masih banyak kenangan indah yang akan kita ciptakan bersama...

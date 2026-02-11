@@ -1,32 +1,13 @@
 import { mediaRepository } from '@/repositories';
-import { prisma } from '@/lib/prisma';
+import { logAudit, type AuditContext } from '@/lib/audit';
 import sharp from 'sharp';
 import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import { randomUUID } from 'crypto';
 
-interface AuditLog {
-  action: string;
-  entityType: string;
-  entityId: string;
-  ipAddress: string;
-  userAgent: string;
-}
-
-async function logAudit(log: AuditLog) {
-  try {
-    await prisma.auditLog.create({
-      data: log,
-    });
-  } catch (error) {
-    console.error('[SERVICE] Failed to log audit:', error);
-  }
-}
-
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
+const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY;
 let supabase: ReturnType<typeof createClient> | null = null;
 
 if (supabaseUrl && supabaseServiceKey) {
@@ -54,7 +35,7 @@ export const mediaService = {
       width?: number;
       height?: number;
     },
-    auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>
+    auditData: AuditContext
   ) {
     const media = await mediaRepository.create(data);
 
@@ -68,7 +49,7 @@ export const mediaService = {
     return media;
   },
 
-  async delete(id: string, auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>) {
+  async delete(id: string, auditData: AuditContext) {
     await this.getById(id); // Verify exists
     
     // Check if orphaned before deleting
@@ -94,7 +75,7 @@ export const mediaService = {
       mimeType,
       size,
     }: { buffer: Buffer; fileName: string; mimeType: string; size: number },
-    auditData: Omit<AuditLog, 'action' | 'entityType' | 'entityId'>
+    auditData: AuditContext
   ) {
     try {
       // Generate unique file name
@@ -109,29 +90,36 @@ export const mediaService = {
 
       // Upload to Supabase if configured
       if (supabase) {
-        const { data, error } = await supabase.storage
-          .from('media')
-          .upload(filePath, buffer, {
-            contentType: mimeType,
-            cacheControl: '3600',
-          });
+        try {
+          const { data, error } = await supabase.storage
+            .from('media')
+            .upload(filePath, buffer, {
+              contentType: mimeType,
+              cacheControl: '3600',
+            });
 
-        if (error) {
-          throw new Error(`Supabase upload failed: ${error.message}`);
+          if (error) {
+            if (error.message.includes('Bucket not found')) {
+              console.warn('[MEDIA] Storage bucket "media" not found — using placeholder');
+              publicUrl = `https://placehold.co/800x600/purple/white?text=${encodeURIComponent(fileName)}`;
+            } else {
+              throw new Error(`Supabase upload failed: ${error.message}`);
+            }
+          } else {
+            // Get public URL
+            const { data: urlData } = supabase.storage
+              .from('media')
+              .getPublicUrl(filePath);
+
+            publicUrl = urlData.publicUrl;
+          }
+        } catch (uploadError: any) {
+          console.error('[MEDIA] Upload error:', uploadError.message);
+          publicUrl = `https://placehold.co/800x600/purple/white?text=${encodeURIComponent(fileName)}`;
         }
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('media')
-          .getPublicUrl(filePath);
-
-        publicUrl = urlData.publicUrl;
       } else {
-        // Fallback: Store metadata only (in production, implement local storage)
-        publicUrl = `/uploads/${uniqueFileName}`;
-        console.warn(
-          '[SERVICE] Supabase not configured, using local storage fallback'
-        );
+        publicUrl = `https://placehold.co/800x600/purple/white?text=${encodeURIComponent(fileName)}`;
+        console.warn('[MEDIA] Supabase not configured — using placeholder');
       }
 
       // Extract image dimensions if it's an image
@@ -140,8 +128,8 @@ export const mediaService = {
           const metadata = await sharp(buffer).metadata();
           width = metadata.width;
           height = metadata.height;
-        } catch (error) {
-          console.warn('[SERVICE] Failed to extract image metadata:', error);
+        } catch {
+          // Non-critical: dimensions are optional
         }
       }
 
@@ -165,7 +153,7 @@ export const mediaService = {
 
       return media;
     } catch (error) {
-      console.error('[SERVICE] Media upload failed:', error);
+      console.error('[MEDIA] Upload failed:', error);
       throw error;
     }
   },

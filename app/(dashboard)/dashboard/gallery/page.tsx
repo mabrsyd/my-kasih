@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useFetch } from '@/hooks';
+import { useFetch, useUnsavedChanges, UnsavedChangesIndicator, useAutoSaveDraft } from '@/hooks';
 import {
   ConfirmDialog,
   MediaUploader,
@@ -9,6 +9,8 @@ import {
   SearchInput,
   Pagination,
   LoadingSpinner,
+  DetailView,
+  DashboardEmptyState,
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -29,6 +31,7 @@ export default function GalleryPage() {
   const [filteredItems, setFilteredItems] = useState<GalleryItem[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -46,7 +49,21 @@ export default function GalleryPage() {
     description: '',
   });
 
+  // Track form changes for unsaved warning
+  const [originalFormData, setOriginalFormData] = useState(formData);
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(originalFormData) && showForm;
+  const { showWarning } = useUnsavedChanges({ isDirty });
+
+  // Auto-save draft
+  const { clearDraft } = useAutoSaveDraft({
+    key: editingId || 'new-gallery',
+    data: formData,
+    enabled: isDirty,
+  });
+
   const { fetch: fetchGallery } = useFetch<GalleryItem[]>('/api/gallery');
+
+  const viewingItem = viewingId ? items.find((i) => i.id === viewingId) : null;
 
   useEffect(() => {
     loadGallery();
@@ -114,8 +131,10 @@ export default function GalleryPage() {
       setShowForm(false);
       setEditingId(null);
       setFormData({ title: '', description: '' });
+      setOriginalFormData({ title: '', description: '' });
       setSelectedImage(null);
       setImageId(null);
+      clearDraft();
       toast.success(editingId ? 'Gallery item updated!' : 'Gallery item created!');
     } catch (error) {
       console.error('Error saving gallery item:', error);
@@ -177,10 +196,12 @@ export default function GalleryPage() {
   };
 
   const handleEdit = (item: GalleryItem) => {
-    setFormData({
+    const newFormData = {
       title: item.title,
       description: item.description,
-    });
+    };
+    setFormData(newFormData);
+    setOriginalFormData(newFormData);
     setSelectedImage(item.image.publicUrl);
     setImageId(item.imageId);
     setEditingId(item.id);
@@ -411,11 +432,28 @@ export default function GalleryPage() {
 
       {/* Grid View with Drag-Drop */}
       {paginatedItems.length === 0 ? (
-        <div className="text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
-          <p className="text-slate-500 text-lg">
-            {searchQuery ? 'No items match your search' : 'No gallery items yet. Create one!'}
-          </p>
-        </div>
+        <DashboardEmptyState
+          icon={searchQuery ? '🔍' : '🖼️'}
+          title={searchQuery ? 'No items found' : 'No gallery items yet'}
+          description={
+            searchQuery
+              ? `No gallery items match "${searchQuery}". Try a different search term.`
+              : 'Create your first gallery item to showcase beautiful moments.'
+          }
+          actionLabel={searchQuery ? undefined : '➕ Create First Item'}
+          onAction={
+            searchQuery
+              ? undefined
+              : () => {
+                  setEditingId(null);
+                  setFormData({ title: '', description: '' });
+                  setOriginalFormData({ title: '', description: '' });
+                  setSelectedImage(null);
+                  setImageId(null);
+                  setShowForm(true);
+                }
+          }
+        />
       ) : (
         <SortableGrid
           items={paginatedItems}
@@ -459,19 +497,23 @@ export default function GalleryPage() {
                 </p>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleEdit(item)}
-                    className="flex-1 px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                    onClick={() => setViewingId(item.id)}
+                    className="flex-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-1"
                   >
-                    Edit
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View
                   </button>
                   <button
                     onClick={() => {
                       setDeleteId(item.id);
                       setShowConfirm(true);
                     }}
-                    className="flex-1 px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                    className="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                   >
-                    Delete
+                    🗑️
                   </button>
                 </div>
               </div>
@@ -515,6 +557,29 @@ export default function GalleryPage() {
         onConfirm={handleBatchDelete}
         onCancel={() => setShowBatchConfirm(false)}
       />
+
+      {/* Detail View */}
+      {viewingItem && (
+        <DetailView
+          isOpen={!!viewingItem}
+          onClose={() => setViewingId(null)}
+          title={viewingItem.title}
+          imageUrl={viewingItem.image.publicUrl}
+          publicUrl={`/gallery#${viewingItem.id}`}
+          fields={[
+            { label: 'Description', value: viewingItem.description || 'No description', fullWidth: true },
+            { label: 'Display Order', value: `Position #${viewingItem.order + 1}` },
+          ]}
+          onEdit={() => handleEdit(viewingItem)}
+          onDelete={() => {
+            setDeleteId(viewingItem.id);
+            setShowConfirm(true);
+          }}
+        />
+      )}
+
+      {/* Unsaved Changes Warning */}
+      <UnsavedChangesIndicator show={showWarning} />
     </div>
   );
 }

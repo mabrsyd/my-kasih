@@ -26,8 +26,8 @@ export default function MomentOfSilence({
       <motion.div
         className="content-intimate text-center"
         variants={cinematicFadeVariants}
-        initial="initial"
-        animate={isInView ? "animate" : "initial"}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
       >
         {/* Decorative line */}
         <motion.div 
@@ -41,8 +41,8 @@ export default function MomentOfSilence({
         <motion.blockquote
           className="text-poetry text-dark-rose/80 mb-8"
           variants={whisperVariants}
-          initial="initial"
-          animate={isInView ? "animate" : "initial"}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
         >
           <span className="text-romantic-red/40 text-4xl leading-none">&ldquo;</span>
           {quote}

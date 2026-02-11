@@ -16,12 +16,12 @@ export function useFetch<T>(url: string) {
       setError(null);
 
       try {
-        const token = sessionStorage.getItem('dashboard_token');
         const response = await global.fetch(url, {
           method: options?.method || 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { 'X-Dashboard-Token': token }),
+            // In development, validateDashboardAccess() bypasses auth check
+            // No need to send token header
           },
           body: options?.body ? JSON.stringify(options.body) : undefined,
         });

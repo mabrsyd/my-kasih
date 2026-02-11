@@ -5,7 +5,7 @@ import { useRef } from 'react';
 import { memoryCardVariants } from '@/lib/animations';
 
 interface TimelineItem {
-  id: number;
+  id: string | number;
   date: string;
   title: string;
   description: string;
@@ -83,10 +83,10 @@ export default function LoveTimeline({ items }: LoveTimelineProps) {
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-                transition={{ 
-                  duration: 0.5, 
+                transition={{
+                  duration: 0.5,
                   delay: index * 0.1,
-                  ease: [0.4, 0, 0.2, 1] 
+                  ease: [0.4, 0, 0.2, 1]
                 }}
                 className="w-3 h-3 rounded-full bg-romantic-red/60 border-2 border-cream shadow-lg z-10"
               />

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateDashboardAccess, getClientIp } from '@/lib/validators/auth';
+import { validateDashboardAccess } from '@/lib/validators/auth';
 import { memoryService } from '@/services';
 import { memorySchema } from '@/lib/validators/content';
 import { ZodError } from 'zod';
@@ -59,7 +59,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { 
+          error: 'Validation error', 
+          details: error.errors.map(e => ({
+            path: e.path.join('.'),
+            message: e.message,
+          }))
+        },
         { status: 400 }
       );
     }
