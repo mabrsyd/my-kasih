@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import LoveTimeline from '@/components/LoveTimeline';
+import MemoryCard from '@/components/MemoryCard';
 import MomentOfSilence from '@/components/MomentOfSilence';
 import ScrollReveal from '@/components/ScrollReveal';
 import { cinematicFadeVariants, purpleGlowVariants } from '@/lib/animations';
@@ -18,6 +18,8 @@ interface MemoryItem {
   emoji: string;
   cover?: {
     publicUrl: string;
+    width?: number;
+    height?: number;
   };
 }
 
@@ -26,21 +28,12 @@ export default function Memories() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/public/memories')
+    fetch('/api/memories')
       .then((res) => res.json())
       .then((data) => setMemories(data))
       .catch(() => setMemories([]))
       .finally(() => setLoading(false));
   }, []);
-
-  // Map DB data to LoveTimeline format
-  const timelineItems = memories.map((m) => ({
-    id: m.id,
-    date: m.date,
-    title: m.title,
-    description: m.description,
-    emoji: m.emoji,
-  }));
 
   return (
     <div className="relative">
@@ -78,7 +71,7 @@ export default function Memories() {
         <div className="max-w-5xl mx-auto px-4">
           {loading ? (
             <RomanticLoader message="Mengingat kembali momen indah..." />
-          ) : timelineItems.length === 0 ? (
+          ) : memories.length === 0 ? (
             <EmptyState
               icon="✦"
               title="Kenangan Sedang Disusun"
@@ -87,7 +80,15 @@ export default function Memories() {
               actionHref="/"
             />
           ) : (
-            <LoveTimeline items={timelineItems} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {memories.map((memory, index) => (
+                <MemoryCard
+                  key={memory.id}
+                  {...memory}
+                  index={index}
+                />
+              ))}
+            </div>
           )}
         </div>
       </section>

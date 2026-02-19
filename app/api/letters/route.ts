@@ -7,19 +7,15 @@ import { headers } from 'next/headers';
 
 /**
  * GET /api/letters
- * Fetches all letters
+ * Fetches letters - default published only, ?published=false for all
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await validateDashboardAccess();
-    if (!auth.valid) {
-      return NextResponse.json(
-        { error: auth.reason || 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const letters = await letterService.getAllForDashboard();
+    const { searchParams } = new URL(request.url);
+    const published = searchParams.get('published');
+    const filter = published === 'false' ? false : true; // Default to published
+    
+    const letters = await letterService.getAll(filter);
     return NextResponse.json(letters, { status: 200 });
   } catch (error) {
     console.error('[API] GET /letters:', error);

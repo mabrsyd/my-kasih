@@ -425,16 +425,8 @@ export default function LettersPage() {
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Cover Image (Optional)
               </label>
-              {selectedImage && (
-                <div className="mb-3">
-                  <img
-                    src={selectedImage}
-                    alt="Cover"
-                    className="h-32 w-full object-cover rounded-lg"
-                  />
-                </div>
-              )}
               <MediaUploader
+                previewUrl={selectedImage || undefined}
                 onSuccess={(mediaId, url) => {
                   setImageId(mediaId);
                   setSelectedImage(url);

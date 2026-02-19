@@ -1,4 +1,4 @@
-import { memoryRepository, galleryRepository, letterRepository, mediaRepository } from '@/repositories';
+import { memoryRepository, galleryRepository, letterRepository, mediaRepository, aboutRepository, settingsRepository } from '@/repositories';
 import {
   memorySchema,
   memoryPartialSchema,
@@ -20,12 +20,18 @@ import { logAudit, type AuditContext } from '@/lib/audit';
 // ============================================
 
 export const memoryService = {
-  async getAll() {
-    return memoryRepository.findAll({ publishedAt: { not: null } });
-  },
-
-  async getAllForDashboard() {
-    return memoryRepository.findAll();
+  /**
+   * Get memories - with optional published filter
+   * @param published - if true, only return published; if false, return all (for CMS); if undefined, return published only
+   */
+  async getAll(published?: boolean) {
+    const where = published === undefined 
+      ? { publishedAt: { not: null } }  // Default: public behavior (published only)
+      : published === false
+      ? {}  // CMS: all items including drafts
+      : { publishedAt: { not: null } };  // Explicit published=true
+    
+    return memoryRepository.findAll(where);
   },
 
   async getById(id: string) {
@@ -41,7 +47,7 @@ export const memoryService = {
       title: validated.title,
       description: validated.description,
       emoji: validated.emoji,
-      ...(validated.coverId && { cover: { connect: { id: validated.coverId } } }),
+      cover: { connect: { id: validated.coverId } },
       publishedAt: validated.publishedAt ? new Date(validated.publishedAt) : new Date(),
     });
 
@@ -60,7 +66,7 @@ export const memoryService = {
     data: MemoryUpdateInput,
     auditData: AuditContext
   ) {
-    await this.getById(id); // Verify exists
+    await this.getById(id);
     const validated = memoryPartialSchema.parse(data);
 
     const updateData: any = { ...validated };
@@ -80,7 +86,7 @@ export const memoryService = {
   },
 
   async delete(id: string, auditData: AuditContext) {
-    await this.getById(id); // Verify exists
+    await this.getById(id);
     await memoryRepository.delete(id);
 
     await logAudit({
@@ -110,7 +116,6 @@ export const galleryService = {
   async create(data: GalleryInput, auditData: AuditContext) {
     const validated = gallerySchema.parse(data);
 
-    // Verify image exists
     const image = await mediaRepository.findById(validated.imageId);
     if (!image) throw new Error('Image not found');
 
@@ -136,7 +141,7 @@ export const galleryService = {
     data: GalleryUpdateInput,
     auditData: AuditContext
   ) {
-    await this.getById(id); // Verify exists
+    await this.getById(id);
     const validated = galleryPartialSchema.parse(data);
 
     if (validated.imageId) {
@@ -162,7 +167,7 @@ export const galleryService = {
   },
 
   async delete(id: string, auditData: AuditContext) {
-    await this.getById(id); // Verify exists
+    await this.getById(id);
     await galleryRepository.delete(id);
 
     await logAudit({
@@ -194,12 +199,18 @@ export const galleryService = {
 // ============================================
 
 export const letterService = {
-  async getAll() {
-    return letterRepository.findAll({ published: true });
-  },
-
-  async getAllForDashboard() {
-    return letterRepository.findAll();
+  /**
+   * Get letters - with optional published filter
+   * @param published - if true, only return published; if false, return all (for CMS); if undefined, return published only
+   */
+  async getAll(published?: boolean) {
+    const where = published === undefined
+      ? { published: true }  // Default: public behavior (published only)
+      : published === false
+      ? {}  // CMS: all items including drafts
+      : { published: true };  // Explicit published=true
+    
+    return letterRepository.findAll(where);
   },
 
   async getById(id: string) {
@@ -239,7 +250,7 @@ export const letterService = {
     data: LetterUpdateInput,
     auditData: AuditContext
   ) {
-    await this.getById(id); // Verify exists
+    await this.getById(id);
     const validated = letterPartialSchema.parse(data);
 
     if (validated.imageId) {
@@ -266,7 +277,7 @@ export const letterService = {
   },
 
   async delete(id: string, auditData: AuditContext) {
-    await this.getById(id); // Verify exists
+    await this.getById(id);
     await letterRepository.delete(id);
 
     await logAudit({
@@ -289,6 +300,118 @@ export const letterService = {
       action: 'UPDATE',
       entityType: 'Letter',
       entityId: 'batch',
+    });
+  },
+};
+
+// ============================================
+// About Service
+// ============================================
+
+export const aboutService = {
+  async getAll() {
+    return aboutRepository.findAll();
+  },
+
+  async create(data: { icon: string; title: string; content: string; order?: number }, auditData: AuditContext) {
+    const about = await aboutRepository.create(data);
+
+    await logAudit({
+      ...auditData,
+      action: 'CREATE',
+      entityType: 'About',
+      entityId: about.id,
+    });
+
+    return about;
+  },
+
+  async update(id: string, data: { icon?: string; title?: string; content?: string; order?: number }, auditData: AuditContext) {
+    const about = await aboutRepository.update(id, data);
+
+    await logAudit({
+      ...auditData,
+      action: 'UPDATE',
+      entityType: 'About',
+      entityId: id,
+    });
+
+    return about;
+  },
+
+  async delete(id: string, auditData: AuditContext) {
+    await aboutRepository.delete(id);
+
+    await logAudit({
+      ...auditData,
+      action: 'DELETE',
+      entityType: 'About',
+      entityId: id,
+    });
+  },
+};
+
+// ============================================
+// Settings Service
+// ============================================
+
+export const settingsService = {
+  async getHeroMessages(): Promise<string[]> {
+    try {
+      const setting = await settingsRepository.findByKey('HERO_MESSAGES');
+      if (!setting) return [];
+      return JSON.parse(setting.value);
+    } catch {
+      return [];
+    }
+  },
+
+  async setHeroMessages(messages: string[], auditData: AuditContext) {
+    const setting = await settingsRepository.upsert(
+      'HERO_MESSAGES',
+      JSON.stringify(messages),
+      'Random hero messages displayed on home page'
+    );
+
+    await logAudit({
+      ...auditData,
+      action: 'UPDATE',
+      entityType: 'Settings',
+      entityId: 'HERO_MESSAGES',
+    });
+
+    return setting;
+  },
+
+  async getSetting(key: string) {
+    return settingsRepository.findByKey(key);
+  },
+
+  async setSetting(key: string, value: string, description: string | undefined, auditData: AuditContext) {
+    const setting = await settingsRepository.upsert(key, value, description);
+
+    await logAudit({
+      ...auditData,
+      action: 'UPDATE',
+      entityType: 'Settings',
+      entityId: key,
+    });
+
+    return setting;
+  },
+
+  async getAllSettings() {
+    return settingsRepository.findAll();
+  },
+
+  async deleteSetting(key: string, auditData: AuditContext) {
+    await settingsRepository.delete(key);
+
+    await logAudit({
+      ...auditData,
+      action: 'DELETE',
+      entityType: 'Settings',
+      entityId: key,
     });
   },
 };

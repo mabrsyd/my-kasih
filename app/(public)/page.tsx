@@ -2,19 +2,32 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import FloatingHearts from '@/components/FloatingHearts';
 import MomentOfSilence from '@/components/MomentOfSilence';
 import ScrollReveal from '@/components/ScrollReveal';
 import { cinematicFadeVariants, breatheVariants, whisperVariants } from '@/lib/animations';
 import { HERO_MESSAGES } from '@/lib/constants';
-import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [randomMessage, setRandomMessage] = useState('');
+  const [messages, setMessages] = useState<string[]>([...HERO_MESSAGES]);
 
   useEffect(() => {
-    setRandomMessage(HERO_MESSAGES[Math.floor(Math.random() * HERO_MESSAGES.length)]);
+    // Try to fetch from Settings API, fall back to constants
+    fetch('/api/settings/hero-messages')
+      .then((res) => res.json())
+      .then((data) => {
+        const heroMessages = data.messages && data.messages.length > 0 ? data.messages : [...HERO_MESSAGES];
+        setMessages(heroMessages);
+        setRandomMessage(heroMessages[Math.floor(Math.random() * heroMessages.length)]);
+      })
+      .catch(() => {
+        // Fallback to constants
+        setMessages([...HERO_MESSAGES]);
+        setRandomMessage(HERO_MESSAGES[Math.floor(Math.random() * HERO_MESSAGES.length)]);
+      });
   }, []);
 
   return (

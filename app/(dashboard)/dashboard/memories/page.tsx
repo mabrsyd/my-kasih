@@ -342,16 +342,8 @@ export default function MemoriesPage() {
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Cover Image (Optional)
               </label>
-              {coverImage && (
-                <div className="mb-3">
-                  <img
-                    src={coverImage}
-                    alt="Cover"
-                    className="h-32 w-full object-cover rounded-lg"
-                  />
-                </div>
-              )}
               <MediaUploader
+                previewUrl={coverImage || undefined}
                 onSuccess={(mediaId, url) => {
                   setCoverId(mediaId);
                   setCoverImage(url);

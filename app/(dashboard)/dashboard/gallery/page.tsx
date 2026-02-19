@@ -366,16 +366,8 @@ export default function GalleryPage() {
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Image *
               </label>
-              {selectedImage && (
-                <div className="mb-3">
-                  <img
-                    src={selectedImage}
-                    alt="Gallery"
-                    className="h-40 w-full object-cover rounded-lg"
-                  />
-                </div>
-              )}
               <MediaUploader
+                previewUrl={selectedImage || undefined}
                 onSuccess={(mediaId, url) => {
                   setImageId(mediaId);
                   setSelectedImage(url);

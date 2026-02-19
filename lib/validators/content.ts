@@ -11,7 +11,7 @@ export const memorySchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(255),
   description: z.string().min(1, 'Description is required'),
   emoji: z.string().min(1, 'Emoji is required'),
-  coverId: z.string().optional().nullable(),
+  coverId: z.string().cuid('Invalid image ID'),
   publishedAt: z.string().optional().nullable().refine(
     (val) => !val || !isNaN(Date.parse(val)),
     { message: 'Invalid publishedAt format' }

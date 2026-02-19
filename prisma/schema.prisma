@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Media {
@@ -33,11 +32,11 @@ model Memory {
   title       String    @db.VarChar(255)
   description String
   emoji       String    @db.VarChar(10)
-  coverId     String?
+  coverId     String    @unique
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   publishedAt DateTime?
-  cover       Media?    @relation("MemoryCover", fields: [coverId], references: [id])
+  cover       Media     @relation("MemoryCover", fields: [coverId], references: [id], onDelete: Cascade)
 
   @@index([date])
   @@index([publishedAt])
@@ -84,6 +83,18 @@ model AuditLog {
   @@index([action, createdAt])
   @@index([ipAddress, createdAt])
   @@index([entityType, entityId])
+}
+
+model About {
+  id        String   @id @default(cuid())
+  icon      String   @db.VarChar(10)
+  title     String   @db.VarChar(255)
+  content   String
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([order])
 }
 
 model Settings {

@@ -1,169 +1,185 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import {
+   LoadingOverlay,
+} from '@/components/dashboard';
+import { H1, H2, P } from '@/components/ui/Typography';
+import toast from 'react-hot-toast';
+
+interface Setting {
+  key: string;
+  value: string;
+  description?: string;
+}
 
 export default function SettingsPage() {
+  const [settings, setSettings] = useState<Setting[]>([]);
+  const [heroMessages, setHeroMessages] = useState<string[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSettings();
+    fetchHeroMessages();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch('/api/settings', {
+        headers: { 'X-Dashboard-Token': process.env.NEXT_PUBLIC_DASHBOARD_TOKEN || '' },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchHeroMessages = async () => {
+    try {
+      const res = await fetch('/api/settings/hero-messages');
+      const data = await res.json();
+      setHeroMessages(data.messages || []);
+    } catch (error) {
+      console.error('Failed to fetch hero messages');
+    }
+  };
+
+  const handleAddMessage = async () => {
+    if (!newMessage.trim()) {
+      toast.error('Message cannot be empty');
+      return;
+    }
+
+    const updated = [...heroMessages, newMessage];
+    try {
+      const res = await fetch('/api/settings/hero-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Dashboard-Token': process.env.NEXT_PUBLIC_DASHBOARD_TOKEN || '',
+        },
+        body: JSON.stringify({ messages: updated }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update');
+
+      toast.success('Message added');
+      setHeroMessages(updated);
+      setNewMessage('');
+    } catch (error) {
+      toast.error('Failed to add message');
+    }
+  };
+
+  const handleRemoveMessage = async (index: number) => {
+    const updated = heroMessages.filter((_, i) => i !== index);
+    try {
+      const res = await fetch('/api/settings/hero-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Dashboard-Token': process.env.NEXT_PUBLIC_DASHBOARD_TOKEN || '',
+        },
+        body: JSON.stringify({ messages: updated }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update');
+
+      toast.success('Message removed');
+      setHeroMessages(updated);
+    } catch (error) {
+      toast.error('Failed to remove message');
+    }
+  };
+
+  if (loading) return <LoadingOverlay message="Loading settings..." />;
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-slate-900 mb-6">Settings</h1>
-
-      <div className="grid gap-6">
-        {/* General Settings */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">
-            General Settings
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Website Title
-              </label>
-              <input
-                type="text"
-                defaultValue="My Kasih"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Website Description
-              </label>
-              <textarea
-                defaultValue="A romantic content management system"
-                rows={3}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-            </div>
-          </div>
+    <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <H1>Site Settings</H1>
+          <P className="text-neutral-600 mt-2">Manage site-wide configuration</P>
         </div>
 
-        {/* API Status */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">API Status</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Memories Endpoint</span>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                ✓ Active
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Gallery Endpoint</span>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                ✓ Active
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Letters Endpoint</span>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                ✓ Active
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Media Upload</span>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                ✓ Configured
-              </span>
-            </div>
-          </div>
-        </div>
+        {/* Hero Messages Section */}
+        <motion.div className="border border-slate-200 rounded-lg p-6 space-y-4">
+          <H2>Hero Messages</H2>
+          <P className="text-neutral-600">Random messages displayed on the home page</P>
 
-        {/* Documentation */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">
-            API Documentation
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-2">Base URL</h3>
-              <code className="block bg-slate-100 p-3 rounded text-sm text-slate-700">
-                /api
-              </code>
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
-                Authentication
-              </h3>
-              <p className="text-slate-600 text-sm mb-2">
-                All endpoints require X-Dashboard-Token header
-              </p>
-              <code className="block bg-slate-100 p-3 rounded text-sm text-slate-700">
-                X-Dashboard-Token: your-token-here
-              </code>
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-2">Endpoints</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    GET /memories
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    POST /memories
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    PATCH /memories/[id]
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    DELETE /memories/[id]
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    GET /gallery
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    POST /gallery
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    PATCH /gallery/[id]
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    DELETE /gallery/[id]
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    GET /letters
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    POST /letters
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    PATCH /letters/[id]
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    DELETE /letters/[id]
-                  </code>
-                </li>
-                <li>
-                  <code className="bg-slate-100 px-2 py-1 rounded">
-                    POST /media/upload
-                  </code>
-                </li>
-              </ul>
-            </div>
+          {/* Input */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddMessage()}
+              placeholder="Add a new hero message..."
+              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+            />
+            <button
+              onClick={handleAddMessage}
+              className="px-6 py-2 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 transition-colors"
+            >
+              Add
+            </button>
           </div>
-        </div>
+
+          {/* Messages List */}
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {heroMessages.length === 0 ? (
+              <p className="text-slate-500 text-center py-8">No messages yet</p>
+            ) : (
+              heroMessages.map((msg, idx) => (
+                <motion.div
+                  key={idx}
+                  className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                >
+                  <p className="text-slate-700">{msg}</p>
+                  <button
+                    onClick={() => handleRemoveMessage(idx)}
+                    className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                  >
+                    Remove
+                  </button>
+                </motion.div>
+              ))
+            )}
+          </div>
+        </motion.div>
+
+        {/* Other Settings Section */}
+        <motion.div className="border border-slate-200 rounded-lg p-6 space-y-4">
+          <H2>Configuration</H2>
+          <P className="text-neutral-600">Other site settings</P>
+
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {settings
+              .filter((s) => s.key !== 'HERO_MESSAGES')
+              .map((setting) => (
+                <motion.div
+                  key={setting.key}
+                  className="p-3 bg-slate-50 rounded-lg border border-slate-200"
+                >
+                  <div className="font-medium text-slate-700">{setting.key}</div>
+                  <div className="text-sm text-slate-600 mt-1">{setting.description || 'No description'}</div>
+                  <div className="text-sm font-mono text-slate-500 mt-2 break-all">{setting.value}</div>
+                </motion.div>
+              ))}
+            {settings.length === 0 && (
+              <p className="text-slate-500 text-center py-8">No settings configured</p>
+            )}
+          </div>
+        </motion.div>
       </div>
-    </div>
   );
 }

@@ -31,7 +31,7 @@ export default function Letter() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/public/letters')
+    fetch('/api/letters')
       .then((res) => res.json())
       .then((data) => setLetters(data))
       .catch(() => setLetters([]))

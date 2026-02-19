@@ -7,19 +7,15 @@ import { headers } from 'next/headers';
 
 /**
  * GET /api/memories
- * Fetches all memories (dashboard - including unpublished)
+ * Fetches memories - default published only, ?published=false for all
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await validateDashboardAccess();
-    if (!auth.valid) {
-      return NextResponse.json(
-        { error: auth.reason || 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const memories = await memoryService.getAllForDashboard();
+    const { searchParams } = new URL(request.url);
+    const published = searchParams.get('published');
+    const filter = published === 'false' ? false : true; // Default to published
+    
+    const memories = await memoryService.getAll(filter);
     return NextResponse.json(memories, { status: 200 });
   } catch (error) {
     console.error('[API] GET /memories:', error);

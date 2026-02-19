@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Clean existing data
+  // Clean existing data (skip About since it's managed by CMS)
   await prisma.memory.deleteMany();
   await prisma.gallery.deleteMany();
   await prisma.letter.deleteMany();
@@ -65,6 +65,44 @@ async function main() {
 
   console.log('✓ Created sample media');
 
+  // Create/seed About chapters (CMS-driven content)
+  const aboutCount = await prisma.about.count();
+  if (aboutCount === 0) {
+    const aboutChapters = [
+      {
+        icon: '✦',
+        title: 'Awal Pertemuan',
+        content: 'Semua bermula dari momen yang tak akan pernah kulupakan. Kamu hadir dalam hidupku seperti sinar mentari yang menembus awan. Ada sesuatu yang ajaib tentang saat itu - koneksi yang terasa lebih dalam dari kata-kata. Bukan hanya cinta pada pandangan pertama; tapi pengakuan jiwa yang selalu kutunggu sepanjang hidupku.',
+        order: 0,
+      },
+      {
+        icon: '♥',
+        title: 'Kenapa Kamu',
+        content: 'Kamu membuatku ingin menjadi orang yang lebih baik setiap hari. Kebaikanmu tak terbatas, tawamu menular, dan kehadiranmu membawa kedamaian di saat gelisahku. Kamu melihatku - bukan hanya siapa aku sekarang, tapi siapa yang ingin aku jadi. Bersamamu, aku merasa aman untuk menjadi diriku seutuhnya.',
+        order: 1,
+      },
+      {
+        icon: '∞',
+        title: 'Perjalanan Kita',
+        content: 'Setiap momen yang kita bagikan adalah berkah. Dari kencan kopi yang tenang hingga lupa waktu, hingga percakapan malam tentang mimpi dan ketakutan, hingga pertengkaran kecil yang hanya membuat kita lebih kuat - setiap bab cerita kita berarti. Kamu mengajariku bahwa cinta bukan hanya perasaan; tapi pilihan yang kita buat setiap hari untuk hadir satu sama lain.',
+        order: 2,
+      },
+      {
+        icon: '◇',
+        title: 'Selamanya',
+        content: 'Aku tidak tahu apa yang masa depan simpan, tapi aku tahu bahwa aku ingin menghadapinya denganmu di sisiku. Apakah kita mendaki gunung atau duduk dalam keheningan, apakah kita menangis atau tertawa sampai sakit - aku ingin mengalami semuanya bersamamu. Kamu adalah petualangan terbesarku, rumah teraman, dan cinta selamanya.',
+        order: 3,
+      },
+    ];
+
+    for (const chapter of aboutChapters) {
+      await prisma.about.create({ data: chapter });
+    }
+    console.log('✓ Created About chapters');
+  } else {
+    console.log('✓ About chapters already exist, skipping...');
+  }
+
   // Create sample memories
   const memory1 = await prisma.memory.create({
     data: {
@@ -85,6 +123,7 @@ async function main() {
       description:
         'Setiap momen bersama kamu adalah kenangan indah yang akan selalu kupelihara...',
       emoji: '🌹',
+      coverId: media2.id,
       publishedAt: new Date(),
     },
   });

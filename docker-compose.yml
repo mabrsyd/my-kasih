@@ -1,6 +1,26 @@
 version: "3.8"
 
 services:
+  # Local PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: my-kasih-db
+    environment:
+      POSTGRES_DB: my_kasih_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - romantic-app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build:
       context: .
@@ -43,3 +63,6 @@ services:
 networks:
   romantic-app:
     driver: bridge
+
+volumes:
+  postgres_data:
