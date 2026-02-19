@@ -3,6 +3,7 @@ import { logAudit, type AuditContext } from '@/lib/audit';
 import sharp from 'sharp';
 import { createClient } from '@supabase/supabase-js';
 import path from 'path';
+import fs from 'fs';
 import { randomUUID } from 'crypto';
 
 // Initialize Supabase client
@@ -12,6 +13,19 @@ let supabase: ReturnType<typeof createClient> | null = null;
 
 if (supabaseUrl && supabaseServiceKey) {
   supabase = createClient(supabaseUrl, supabaseServiceKey);
+}
+
+/**
+ * Save buffer to public/uploads/ and return the public URL path.
+ * Used as fallback when Supabase is not configured.
+ */
+function saveLocally(buffer: Buffer, uniqueFileName: string): string {
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(uploadDir, uniqueFileName), buffer);
+  return `/uploads/${uniqueFileName}`;
 }
 
 export const mediaService = {
@@ -50,12 +64,20 @@ export const mediaService = {
   },
 
   async delete(id: string, auditData: AuditContext) {
-    await this.getById(id); // Verify exists
+    const media = await this.getById(id); // Verify exists
     
     // Check if orphaned before deleting
     const isOrphaned = await mediaRepository.isOrphaned(id);
     if (!isOrphaned) {
       throw new Error('Cannot delete media that is being used');
+    }
+
+    // Delete local file if it exists
+    if (media.publicUrl.startsWith('/uploads/')) {
+      const localPath = path.join(process.cwd(), 'public', media.publicUrl);
+      if (fs.existsSync(localPath)) {
+        fs.unlinkSync(localPath);
+      }
     }
 
     await mediaRepository.delete(id);
@@ -100,8 +122,8 @@ export const mediaService = {
 
           if (error) {
             if (error.message.includes('Bucket not found')) {
-              console.warn('[MEDIA] Storage bucket "media" not found — using placeholder');
-              publicUrl = `https://placehold.co/800x600/purple/white?text=${encodeURIComponent(fileName)}`;
+              console.warn('[MEDIA] Storage bucket "media" not found — falling back to local storage');
+              publicUrl = saveLocally(buffer, uniqueFileName);
             } else {
               throw new Error(`Supabase upload failed: ${error.message}`);
             }
@@ -114,12 +136,12 @@ export const mediaService = {
             publicUrl = urlData.publicUrl;
           }
         } catch (uploadError: any) {
-          console.error('[MEDIA] Upload error:', uploadError.message);
-          publicUrl = `https://placehold.co/800x600/purple/white?text=${encodeURIComponent(fileName)}`;
+          console.error('[MEDIA] Upload error, falling back to local:', uploadError.message);
+          publicUrl = saveLocally(buffer, uniqueFileName);
         }
       } else {
-        publicUrl = `https://placehold.co/800x600/purple/white?text=${encodeURIComponent(fileName)}`;
-        console.warn('[MEDIA] Supabase not configured — using placeholder');
+        console.warn('[MEDIA] Supabase not configured — saving to local storage');
+        publicUrl = saveLocally(buffer, uniqueFileName);
       }
 
       // Extract image dimensions if it's an image

@@ -64,17 +64,18 @@ export default function Gallery() {
           className="text-center content-intimate px-4"
         >
           <motion.span
-            className="text-4xl md:text-5xl block mb-8 opacity-40"
+            className="text-4xl md:text-5xl block mb-8"
             initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.4 }}
+            animate={{ scale: 1, opacity: 0.45 }}
             transition={{ duration: 1, delay: 0.2 }}
+            style={{ color: '#c4b0ee' }}
           >
             ◇
           </motion.span>
 
-          <H1 className="mb-6">Galeri Kenangan</H1>
+          <H1 className="mb-6" style={{ color: '#4a3880' }}>Galeri Kenangan</H1>
 
-          <P className="max-w-xl mx-auto text-lg text-purple-warm opacity-90">
+          <P className="max-w-xl mx-auto text-lg opacity-90" style={{ color: 'rgba(114,80,200,0.7)' }}>
             Perjalanan visual melalui momen-momen indah yang kami ciptakan
             bersama
           </P>

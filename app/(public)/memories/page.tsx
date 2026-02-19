@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import MemoryCard from '@/components/MemoryCard';
 import MomentOfSilence from '@/components/MomentOfSilence';
 import ScrollReveal from '@/components/ScrollReveal';
-import { cinematicFadeVariants, purpleGlowVariants } from '@/lib/animations';
+import { cinematicFadeVariants } from '@/lib/animations';
 import { H1, P, Whisper } from '@/components/ui/Typography';
 import { RomanticLoader } from '@/components/dashboard/RomanticLoaders';
 import { EmptyState } from '@/components/dashboard/EmptyState';
@@ -49,17 +49,18 @@ export default function Memories() {
           className="text-center content-intimate px-4"
         >
           <motion.span
-            className="text-5xl md:text-6xl block mb-8 text-purple-secondary opacity-40"
+            className="text-4xl md:text-5xl block mb-8 opacity-40"
             initial={{ scale: 0.6, opacity: 0 }}
-            variants={purpleGlowVariants}
-            animate="animate"
+            animate={{ scale: [1, 1.1, 1], opacity: 0.5 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ color: '#c4b0ee' }}
           >
             ✦
           </motion.span>
 
-          <H1 className="mb-6 text-purple-primary">Kenangan Indah</H1>
+          <H1 className="mb-6" style={{ color: '#4a3880' }}>Kenangan Indah</H1>
 
-          <P className="max-w-lg mx-auto text-lg text-purple-warm opacity-90">
+          <P className="max-w-lg mx-auto text-lg opacity-90" style={{ color: 'rgba(114,80,200,0.7)' }}>
             Setiap momen bersamamu adalah harta yang kusimpan selamanya dalam
             perjalanan waktu
           </P>

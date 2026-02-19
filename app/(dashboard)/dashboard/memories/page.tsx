@@ -41,6 +41,10 @@ export default function MemoriesPage() {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [showBatchConfirm, setShowBatchConfirm] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  // Keep original publishedAt so editing a published memory doesn't reset the date
+  const [originalPublishedAt, setOriginalPublishedAt] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -49,7 +53,7 @@ export default function MemoriesPage() {
     emoji: '💕',
   });
 
-  const { fetch: fetchMemories } = useFetch<Memory[]>('/api/memories');
+  const { fetch: fetchMemories } = useFetch<Memory[]>('/api/memories?published=false');
 
   useEffect(() => {
     loadMemories();
@@ -84,6 +88,13 @@ export default function MemoriesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Client-side guard — cover image is required
+    if (!coverId) {
+      toast.error('Please select and upload a cover image first');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -102,12 +113,24 @@ export default function MemoriesPage() {
           ...formData,
           date: new Date(formData.date).toISOString(),
           coverId: coverId || undefined,
+          // Send publishedAt: ISO string to publish, null to unpublish
+          // Preserve existing publishedAt when editing an already-published memory
+          publishedAt: isPublished
+            ? (originalPublishedAt ?? new Date().toISOString())
+            : null,
         }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to save memory');
+        const errorData = await response.json();
+        // Surface specific Zod validation field errors if present
+        if (errorData.details?.length) {
+          const messages = errorData.details.map((d: { path: string; message: string }) =>
+            d.path ? `${d.path}: ${d.message}` : d.message
+          ).join(', ');
+          throw new Error(messages);
+        }
+        throw new Error(errorData.error || 'Failed to save memory');
       }
 
       await loadMemories();
@@ -121,6 +144,8 @@ export default function MemoriesPage() {
       });
       setCoverImage(null);
       setCoverId(null);
+      setIsPublished(false);
+      setOriginalPublishedAt(null);
       toast.success(editingId ? 'Memory updated!' : 'Memory created!');
     } catch (error) {
       console.error('Error saving memory:', error);
@@ -165,6 +190,8 @@ export default function MemoriesPage() {
     });
     setCoverImage(memory.cover?.publicUrl || null);
     setCoverId(memory.coverId || null);
+    setIsPublished(!!memory.publishedAt);
+    setOriginalPublishedAt(memory.publishedAt || null);
     setEditingId(memory.id);
     setShowForm(true);
   };
@@ -253,6 +280,8 @@ export default function MemoriesPage() {
               });
               setCoverImage(null);
               setCoverId(null);
+              setIsPublished(false);
+              setOriginalPublishedAt(null);
               setShowForm(!showForm);
             }}
             className="px-4 py-2 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 transition-colors"
@@ -340,10 +369,11 @@ export default function MemoriesPage() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Cover Image (Optional)
+                Cover Image <span className="text-red-500">*</span>
               </label>
               <MediaUploader
                 previewUrl={coverImage || undefined}
+                onUploadingChange={setIsImageUploading}
                 onSuccess={(mediaId, url) => {
                   setCoverId(mediaId);
                   setCoverImage(url);
@@ -352,6 +382,27 @@ export default function MemoriesPage() {
                 onError={(error) => toast.error(error)}
               />
             </div>
+
+            {/* Publish toggle */}
+            <label className="flex items-center gap-3 cursor-pointer select-none p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={isPublished}
+                  onChange={(e) => setIsPublished(e.target.checked)}
+                />
+                <div className={`w-10 h-6 rounded-full transition-colors ${
+                  isPublished ? 'bg-rose-500' : 'bg-slate-300'
+                }`} />
+                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                  isPublished ? 'translate-x-4' : 'translate-x-0'
+                }`} />
+              </div>
+              <span className="text-sm font-medium text-slate-700">
+                {isPublished ? '🌸 Published' : '📝 Draft'}
+              </span>
+            </label>
 
             <div className="flex gap-3 justify-end pt-4">
               <button
@@ -363,13 +414,13 @@ export default function MemoriesPage() {
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isImageUploading}
                 className="px-4 py-2 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {loading && (
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
-                {editingId ? 'Update' : 'Create'} Memory
+                {isImageUploading ? 'Uploading image...' : editingId ? 'Update' : 'Create'} Memory
               </button>
             </div>
           </form>

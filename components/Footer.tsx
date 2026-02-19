@@ -18,17 +18,19 @@ export default function Footer() {
       <div className="max-w-2xl mx-auto px-6">
         {/* Decorative line */}
         <motion.div 
-          className="w-16 h-px bg-purple-accent/20 mx-auto mb-12"
+          className="h-px mx-auto mb-14 max-w-64"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(196,176,238,0.7) 30%, rgba(114,80,200,0.5) 50%, rgba(196,176,238,0.7) 70%, transparent)' }}
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 1.2 }}
         />
 
         {/* Main content */}
         <div className="text-center mb-12">
           <motion.h3 
-            className="font-serif-display text-lg text-purple-primary mb-4"
+            className="font-serif-elegant text-xl font-light tracking-wide mb-4"
+            style={{ color: '#5b3dad' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -38,7 +40,8 @@ export default function Footer() {
           </motion.h3>
           
           <motion.p 
-            className="text-whisper text-purple-warm/70 mb-8"
+            className="text-xs tracking-wide mb-8 font-serif-body"
+            style={{ color: 'rgba(114,80,200,0.5)' }}
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}

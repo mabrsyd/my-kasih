@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Media {
-  id            String   @id @default(cuid())
+  id            String   @id @default(uuid())
   fileName      String   @db.VarChar(255)
   filePath      String   @unique
   publicUrl     String
@@ -27,7 +27,7 @@ model Media {
 }
 
 model Memory {
-  id          String    @id @default(cuid())
+  id          String    @id @default(uuid())
   date        DateTime
   title       String    @db.VarChar(255)
   description String
@@ -43,7 +43,7 @@ model Memory {
 }
 
 model Gallery {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   title       String   @db.VarChar(255)
   description String?
   order       Int      @default(0)
@@ -56,7 +56,7 @@ model Gallery {
 }
 
 model Letter {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   title     String   @db.VarChar(255)
   content   String
   order     Int      @default(0)
@@ -71,7 +71,7 @@ model Letter {
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
+  id         String   @id @default(uuid())
   action     String   @db.VarChar(50)
   entityType String   @db.VarChar(50)
   entityId   String   @db.VarChar(100)
@@ -86,7 +86,7 @@ model AuditLog {
 }
 
 model About {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   icon      String   @db.VarChar(10)
   title     String   @db.VarChar(255)
   content   String

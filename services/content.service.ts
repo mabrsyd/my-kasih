@@ -1,4 +1,5 @@
 import { memoryRepository, galleryRepository, letterRepository, mediaRepository, aboutRepository, settingsRepository } from '@/repositories';
+import { Prisma } from '@prisma/client';
 import {
   memorySchema,
   memoryPartialSchema,
@@ -48,7 +49,8 @@ export const memoryService = {
       description: validated.description,
       emoji: validated.emoji,
       cover: { connect: { id: validated.coverId } },
-      publishedAt: validated.publishedAt ? new Date(validated.publishedAt) : new Date(),
+      // Default to draft (null); only publish if publishedAt is explicitly provided
+      publishedAt: validated.publishedAt ? new Date(validated.publishedAt) : null,
     });
 
     await logAudit({
@@ -69,9 +71,18 @@ export const memoryService = {
     await this.getById(id);
     const validated = memoryPartialSchema.parse(data);
 
-    const updateData: any = { ...validated };
-    if (validated.date) updateData.date = new Date(validated.date);
-    if (validated.publishedAt) updateData.publishedAt = new Date(validated.publishedAt);
+    // Build Prisma update input explicitly to avoid raw scalar FK issues
+    const updateData: Prisma.MemoryUpdateInput = {};
+    if (validated.date !== undefined) updateData.date = new Date(validated.date);
+    if (validated.title !== undefined) updateData.title = validated.title;
+    if (validated.description !== undefined) updateData.description = validated.description;
+    if (validated.emoji !== undefined) updateData.emoji = validated.emoji;
+    // Use Prisma relation connect (same pattern as galleryService & letterService)
+    if (validated.coverId !== undefined) updateData.cover = { connect: { id: validated.coverId } };
+    // Explicitly handle null to allow unpublishing (if (truthy) would skip null)
+    if (validated.publishedAt !== undefined) {
+      updateData.publishedAt = validated.publishedAt ? new Date(validated.publishedAt) : null;
+    }
 
     const memory = await memoryRepository.update(id, updateData);
 

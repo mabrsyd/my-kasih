@@ -10,9 +10,10 @@ const H1 = React.forwardRef<HTMLHeadingElement, TypographyProps>(
     <h1
       ref={ref}
       className={clsx(
-        'text-poetry font-serif-display font-bold text-purple-primary leading-tight',
+        'font-serif-display font-light text-purple-primary leading-tight',
         className
       )}
+      style={{ fontSize: 'clamp(2.4rem, 6vw, 4rem)', letterSpacing: '-0.02em' }}
       {...props}
     />
   )

@@ -1,28 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --color-purple-primary: #6B3FA0;
-  --color-purple-secondary: #C8A8D8;
-  --color-purple-accent: #9D4E6C;
-  --color-purple-warm: #7B4B7B;
-  --color-purple-light: #D4C5E0;
-  --color-purple-pale: #F0E6F7;
-  --color-neutral-off-white: #F9F7FC;
-  --color-neutral-light: #E8E3F0;
-  --color-neutral-dark: #2A2A2A;
-  
-  /* Legacy support */
-  --color-soft-pink: #F0E6F7;
-  --color-pastel-red: #C8A8D8;
-  --color-beige: #F9F7FC;
-  --color-cream: #F0E6F7;
-  --color-romantic-red: #9D4E6C;
-  --color-warm-beige: #E8E3F0;
-  --color-dark-rose: #9D4E6C;
-  
+  /* ── Lilac-forward palette ── */
+  --color-lilac-50:  #f7f3ff;
+  --color-lilac-100: #ede6fa;
+  --color-lilac-200: #daccf5;
+  --color-lilac-300: #c4b0ee;
+  --color-lilac-400: #a98de4;
+  --color-lilac-500: #8e6bda;
+  --color-lilac-600: #7250c8;
+  --color-lilac-700: #5b3dad;
+
+  --color-purple-primary:   #6B4FAE;
+  --color-purple-secondary: #C4B0EE;
+  --color-purple-accent:    #9B5EA2;
+  --color-purple-warm:      #7D5A9A;
+  --color-purple-light:     #DDD6F5;
+  --color-purple-pale:      #F2EDFC;
+
+  --color-mauve:      #B97BA8;
+  --color-rose-soft:  #E8B4C8;
+  --color-cream:      #FBF8FF;
+
+  --color-neutral-off-white: #FBF8FF;
+  --color-neutral-light:     #EDE8F8;
+  --color-neutral-dark:      #2D2540;
+
+  /* Legacy aliases */
+  --color-soft-pink:    #F2EDFC;
+  --color-pastel-red:   #C4B0EE;
+  --color-beige:        #FBF8FF;
+  --color-romantic-red: #9B5EA2;
+  --color-warm-beige:   #EDE8F8;
+  --color-dark-rose:    #7250C8;
+
   --font-serif-display: 'Playfair Display', serif;
-  --font-serif-body: 'Lora', serif;
+  --font-serif-body:    'Lora', serif;
+  --font-serif-elegant: 'Cormorant Garamond', serif;
 }
 
 :root {
@@ -34,8 +49,11 @@ html {
 }
 
 body {
-  background: linear-gradient(135deg, #F0E6F7 0%, #F9F7FC 100%);
-  color: #5a5a5a;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(196,176,238,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(155,94,162,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, #f7f3ff 0%, #fbf8ff 100%);
+  color: #2D2540;
   font-family: 'Lora', serif;
   overflow-x: hidden;
   min-height: 100vh;
@@ -43,8 +61,8 @@ body {
 
 /* Selection styling */
 ::selection {
-  background-color: #9D4E6C;
-  color: white;
+  background-color: #c4b0ee;
+  color: #3a2880;
 }
 
 /* Smooth animations */
@@ -212,7 +230,7 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 9998;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(107, 63, 160, 0.08) 100%);
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(114, 80, 200, 0.05) 100%);
 }
 
 /* Glass morphism effect */
@@ -226,9 +244,9 @@ body {
 /* Soft shadow for cards */
 .shadow-romantic {
   box-shadow: 
-    0 4px 6px -1px rgba(107, 63, 160, 0.06),
-    0 10px 15px -3px rgba(107, 63, 160, 0.08),
-    0 20px 25px -5px rgba(107, 63, 160, 0.05);
+    0 4px 6px -1px rgba(114, 80, 200, 0.07),
+    0 10px 15px -3px rgba(114, 80, 200, 0.1),
+    0 1px 3px rgba(114, 80, 200, 0.06);
 }
 
 /* Hover glow effect */
@@ -389,30 +407,57 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.875rem 2rem;
+  padding: 0.875rem 2.25rem;
   font-family: 'Lora', serif;
-  font-size: 0.9rem;
-  letter-spacing: 0.05em;
-  color: #2A2A2A;
-  background: rgba(200, 168, 216, 0.15);
-  border: 1px solid rgba(107, 63, 160, 0.2);
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+  color: #4a3880;
+  background: rgba(196, 176, 238, 0.18);
+  border: 1px solid rgba(196, 176, 238, 0.5);
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
 }
 
 .btn-romantic:hover {
-  background: rgba(107, 63, 160, 0.1);
-  border-color: rgba(107, 63, 160, 0.3);
+  background: rgba(155, 94, 162, 0.12);
+  border-color: rgba(114, 80, 200, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(107, 63, 160, 0.15);
+  box-shadow: 0 8px 30px rgba(114, 80, 200, 0.2), 0 0 0 1px rgba(196, 176, 238, 0.3);
+  color: #5b3dad;
+}
+
+/* Filled primary button */
+.btn-romantic-filled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 2.25rem;
+  font-family: 'Lora', serif;
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, #8e6bda 0%, #7250c8 50%, #9b5ea2 100%);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(114, 80, 200, 0.35);
+}
+
+.btn-romantic-filled:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 35px rgba(114, 80, 200, 0.45);
+  background: linear-gradient(135deg, #9b7be6 0%, #8261d4 50%, #ab6eb8 100%);
 }
 
 /* Link underline animation */
 .link-romantic {
   position: relative;
-  color: #9D4E6C;
+  color: #7250c8;
   text-decoration: none;
+  font-family: 'Lora', serif;
 }
 
 .link-romantic::after {
@@ -423,9 +468,39 @@ body {
   width: 0;
   height: 1px;
   background: currentColor;
-  transition: width 0.3s ease;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .link-romantic:hover::after {
   width: 100%;
+}
+
+/* Premium shimmer divider */
+.divider-lilac {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(196,176,238,0.6) 30%, rgba(114,80,200,0.4) 50%, rgba(196,176,238,0.6) 70%, transparent 100%);
+  margin: 0 auto;
+}
+
+/* Lilac glow card */
+.card-lilac {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(196, 176, 238, 0.35);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 4px 6px rgba(114, 80, 200, 0.04),
+    0 10px 20px rgba(114, 80, 200, 0.07),
+    0 1px 0 rgba(255,255,255,0.8) inset;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-lilac:hover {
+  border-color: rgba(196, 176, 238, 0.6);
+  box-shadow:
+    0 8px 16px rgba(114, 80, 200, 0.1),
+    0 20px 40px rgba(114, 80, 200, 0.12),
+    0 1px 0 rgba(255,255,255,0.8) inset;
+  transform: translateY(-4px);
 }

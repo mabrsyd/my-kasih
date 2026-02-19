@@ -11,7 +11,7 @@ export const memorySchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(255),
   description: z.string().min(1, 'Description is required'),
   emoji: z.string().min(1, 'Emoji is required'),
-  coverId: z.string().cuid('Invalid image ID'),
+  coverId: z.string().uuid('Invalid cover image ID'),
   publishedAt: z.string().optional().nullable().refine(
     (val) => !val || !isNaN(Date.parse(val)),
     { message: 'Invalid publishedAt format' }
@@ -30,7 +30,7 @@ export type MemoryUpdateInput = z.infer<typeof memoryPartialSchema>;
 export const gallerySchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(255),
   description: z.string().optional(),
-  imageId: z.string().cuid('Invalid image ID'),
+  imageId: z.string().uuid('Invalid image ID'),
   order: z.number().int().default(0),
 });
 
@@ -46,7 +46,7 @@ export type GalleryUpdateInput = z.infer<typeof galleryPartialSchema>;
 export const letterSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(255),
   content: z.string().min(20, 'Content must be at least 20 characters'),
-  imageId: z.string().cuid().optional(),
+  imageId: z.string().uuid().optional(),
   order: z.number().int().default(0),
   published: z.boolean().default(false),
 });

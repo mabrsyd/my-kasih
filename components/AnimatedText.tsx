@@ -1,12 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { CSSProperties, useState, useEffect } from 'react';
 
 interface AnimatedTextProps {
   text: string;
   delay?: number;
   className?: string;
+  style?: CSSProperties;
   duration?: number;
 }
 
@@ -14,6 +15,7 @@ export default function AnimatedText({
   text,
   delay = 0,
   className = '',
+  style,
   duration = 0.05,
 }: AnimatedTextProps) {
   const [displayedText, setDisplayedText] = useState('');
@@ -38,6 +40,7 @@ export default function AnimatedText({
       animate={{ opacity: 1 }}
       transition={{ delay }}
       className={className}
+      style={style}
     >
       {displayedText}
       <motion.span

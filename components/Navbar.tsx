@@ -21,7 +21,7 @@ export default function Navbar() {
       transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
       className={`fixed w-full top-0 z-50 transition-all duration-500 ${
         isScrolled 
-          ? 'bg-white/75 backdrop-blur-lg shadow-romantic border-b border-purple-secondary/20' 
+          ? 'bg-white/70 backdrop-blur-xl shadow-romantic border-b border-purple-secondary/20' 
           : 'bg-transparent'
       }`}
     >
@@ -33,7 +33,8 @@ export default function Navbar() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.3 }}
-              className="font-serif-display text-lg font-semibold text-purple-primary"
+              className="font-serif-elegant text-xl font-light tracking-wide"
+              style={{ color: '#5b3dad', letterSpacing: '0.02em' }}
             >
               {SITE_NAME}
             </motion.div>
@@ -50,7 +51,8 @@ export default function Navbar() {
               >
                 <Link
                   href={link.href}
-                  className="font-serif-body text-sm text-purple-primary/70 hover:text-purple-accent transition-colors duration-300 relative group tracking-wide"
+                  className="font-serif-body text-sm transition-colors duration-300 relative group tracking-wide"
+                  style={{ color: 'rgba(114,80,200,0.65)' }}
                 >
                   {link.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-purple-accent group-hover:w-full transition-all duration-400 ease-out" />

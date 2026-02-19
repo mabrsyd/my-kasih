@@ -43,6 +43,7 @@ export default function GalleryPage() {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [showBatchConfirm, setShowBatchConfirm] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -368,6 +369,7 @@ export default function GalleryPage() {
               </label>
               <MediaUploader
                 previewUrl={selectedImage || undefined}
+                onUploadingChange={setIsImageUploading}
                 onSuccess={(mediaId, url) => {
                   setImageId(mediaId);
                   setSelectedImage(url);
@@ -387,13 +389,13 @@ export default function GalleryPage() {
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isImageUploading}
                 className="px-4 py-2 bg-pink-500 text-white rounded-lg font-medium hover:bg-pink-600 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {loading && (
+                {(loading || isImageUploading) && (
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
-                {editingId ? 'Update' : 'Create'} Item
+                {isImageUploading ? 'Uploading image...' : `${editingId ? 'Update' : 'Create'} Item`}
               </button>
             </div>
           </form>

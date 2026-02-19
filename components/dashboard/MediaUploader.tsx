@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 
 interface MediaUploaderProps {
   onSuccess: (mediaId: string, url: string, fileName: string) => void;
   onError?: (error: string) => void;
+  onUploadingChange?: (uploading: boolean) => void;
   accept?: string;
   previewUrl?: string;
 }
@@ -22,13 +23,18 @@ interface FilePreview {
 export function MediaUploader({
   onSuccess,
   onError,
+  onUploadingChange,
   accept = 'image/*',
   previewUrl,
 }: MediaUploaderProps) {
   const [loading, setLoading] = useState(false);
+
+  const setLoadingState = (val: boolean) => {
+    setLoading(val);
+    onUploadingChange?.(val);
+  };
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<FilePreview | null>(null);
-  const [showConfirm, setShowConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,14 +42,13 @@ export function MediaUploader({
     if (!file) return;
 
     setError(null);
+    setLoadingState(true);
 
     try {
-      // Create preview
+      // Show local preview immediately
       const reader = new FileReader();
       reader.onload = (event) => {
         const url = event.target?.result as string;
-        
-        // Get image dimensions
         const img = new window.Image();
         img.onload = () => {
           setPreview({
@@ -54,35 +59,15 @@ export function MediaUploader({
             width: img.width,
             height: img.height,
           });
-          setShowConfirm(true);
         };
         img.onerror = () => {
-          setPreview({
-            url,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-          });
-          setShowConfirm(true);
+          setPreview({ url, name: file.name, size: file.size, type: file.type });
         };
         img.src = url;
       };
       reader.readAsDataURL(file);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to preview image';
-      setError(errorMessage);
-      onError?.(errorMessage);
-    }
-  };
 
-  const handleConfirmUpload = async () => {
-    if (!fileInputRef.current?.files?.[0] || !preview) return;
-
-    const file = fileInputRef.current.files[0];
-    setLoading(true);
-    setError(null);
-
-    try {
+      // Upload immediately without waiting for confirm
       const formData = new FormData();
       formData.append('file', file);
 
@@ -102,130 +87,24 @@ export function MediaUploader({
 
       const data = await response.json();
       onSuccess(data.id, data.publicUrl, file.name);
-      setPreview(null);
-      setShowConfirm(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Upload failed';
       setError(errorMessage);
+      setPreview(null);
       onError?.(errorMessage);
-    } finally {
-      setLoading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    } finally {
+      setLoadingState(false);
     }
   };
 
-  const handleCancel = () => {
-    setPreview(null);
-    setShowConfirm(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
+  const displayUrl = previewUrl || preview?.url;
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
-
-  // Show existing preview
-  if (previewUrl && !showConfirm) {
-    return (
-      <div className="space-y-3">
-        <div className="relative w-full h-48 bg-slate-100 rounded-lg overflow-hidden">
-          <Image
-            src={previewUrl}
-            alt="Current preview"
-            fill
-            className="object-cover"
-          />
-        </div>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={loading}
-          className="w-full px-4 py-2 border-2 border-slate-300 rounded-lg text-slate-600 font-medium hover:border-slate-400 transition-colors disabled:opacity-50 text-sm"
-        >
-          🔄 Change Image
-        </button>
-      </div>
-    );
-  }
-
-  // Preview dialog
-  if (showConfirm && preview) {
-    return (
-      <div className="space-y-4">
-        <div className="border-2 border-slate-200 rounded-lg overflow-hidden bg-slate-50 p-4">
-          {/* Image Preview */}
-          <div className="relative w-full h-48 bg-slate-200 rounded-lg overflow-hidden mb-4">
-            <Image
-              src={preview.url}
-              alt="Preview"
-              fill
-              className="object-contain"
-            />
-          </div>
-
-          {/* File Details */}
-          <div className="space-y-2 text-sm bg-white p-3 rounded border border-slate-200">
-            <div className="flex justify-between">
-              <span className="text-slate-600">📄 File Name:</span>
-              <span className="font-medium text-slate-900 truncate ml-2">{preview.name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">💾 File Size:</span>
-              <span className="font-medium text-slate-900">{formatFileSize(preview.size)}</span>
-            </div>
-            {preview.width && preview.height && (
-              <div className="flex justify-between">
-                <span className="text-slate-600">📐 Dimensions:</span>
-                <span className="font-medium text-slate-900">{preview.width} × {preview.height} px</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-slate-600">🎨 Type:</span>
-              <span className="font-medium text-slate-900">{preview.type || 'Image'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          <button
-            onClick={handleConfirmUpload}
-            disabled={loading}
-            className="flex-1 px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>✅ Upload</>
-            )}
-          </button>
-          <button
-            onClick={handleCancel}
-            disabled={loading}
-            className="flex-1 px-4 py-3 border-2 border-slate-300 text-slate-600 font-medium rounded-lg hover:border-slate-400 transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-        </div>
-
-        {error && <p className="text-red-600 text-sm">❌ {error}</p>}
-      </div>
-    );
-  }
-
-  // Initial upload button
+  // Always render the hidden input so fileInputRef works everywhere
   return (
-    <div>
+    <div className="space-y-3">
       <input
         ref={fileInputRef}
         type="file"
@@ -235,22 +114,53 @@ export function MediaUploader({
         className="hidden"
       />
 
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        disabled={loading}
-        className="w-full px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 font-medium hover:border-slate-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <>
-            <span className="inline-block w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin" />
-            Processing...
-          </>
-        ) : (
-          <>📤 Choose Image</>
-        )}
-      </button>
-
-      {error && <p className="text-red-600 text-sm mt-2">❌ {error}</p>}
+      {displayUrl && !loading ? (
+        // Show uploaded preview with option to change
+        <>
+          <div className="relative w-full rounded-xl overflow-hidden bg-slate-900 shadow-inner" style={{ aspectRatio: '16/9' }}>
+            <Image
+              src={displayUrl}
+              alt="Current preview"
+              fill
+              unoptimized={displayUrl.startsWith('/')}
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 700px"
+            />
+          </div>
+          {(preview?.width && preview?.height) && (
+            <p className="text-xs text-slate-500 text-center">
+              {preview.width} × {preview.height}px · {(preview.size / 1024).toFixed(0)} KB
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full px-4 py-2 border-2 border-slate-300 rounded-lg text-slate-600 font-medium hover:border-pink-400 hover:text-pink-600 hover:border-pink-400 transition-colors text-sm"
+          >
+            🔄 Ganti Gambar
+          </button>
+        </>
+      ) : (
+        // Upload button (also shows spinner while uploading)
+        <>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading}
+            className="w-full px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 font-medium hover:border-slate-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <span className="inline-block w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>📤 Choose Image</>
+            )}
+          </button>
+          {error && <p className="text-red-600 text-sm mt-2">❌ {error}</p>}
+        </>
+      )}
     </div>
   );
 }

@@ -71,7 +71,7 @@ export default function Letter() {
             </motion.span>
           </motion.div>
 
-          <H1 className="mb-6 text-purple-primary">Surat Untukmu</H1>
+          <H1 className="mb-6 text-purple-primary" style={{ color: '#4a3880' }}>Surat Untukmu</H1>
 
           <P className="mb-12 max-w-lg mx-auto text-purple-warm opacity-90 text-lg">
             Kata-kata dari hatiku yang terdalam,
@@ -136,8 +136,20 @@ export default function Letter() {
                         : { opacity: 0, y: 20 }
                     }
                     transition={{ duration: 0.8, delay: 0.2 }}
-                    className="bg-white/70 backdrop-blur-md border border-l-4 border-purple-secondary rounded-2xl p-8 md:p-12 shadow-romantic border-l-purple-accent"
+                    className="bg-white/75 backdrop-blur-md border border-purple-secondary/30 border-l-4 border-l-purple-accent rounded-2xl p-8 md:p-12 shadow-romantic"
                   >
+                    {/* Letter image (if any) */}
+                    {letter.image?.publicUrl && (
+                      <div className="relative w-full h-64 mb-8 rounded-xl overflow-hidden">
+                        <img
+                          src={letter.image.publicUrl}
+                          alt={letter.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
+                      </div>
+                    )}
+
                     {/* Letter title */}
                     <motion.h2
                       className="text-handwritten text-xl text-purple-accent mb-8 font-serif-body"

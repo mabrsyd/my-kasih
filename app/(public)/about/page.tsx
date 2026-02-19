@@ -2,11 +2,10 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import ScrollReveal, { StaggerReveal } from '@/components/ScrollReveal';
+import ScrollReveal from '@/components/ScrollReveal';
 import MomentOfSilence from '@/components/MomentOfSilence';
 import { cinematicFadeVariants, containerVariants, itemVariants } from '@/lib/animations';
-import { H1, H2, P, Whisper } from '@/components/ui/Typography';
-import { Card, CardContent } from '@/components/ui/Card';
+import { H1, P, Whisper } from '@/components/ui/Typography';
 import { RomanticLoader } from '@/components/dashboard/RomanticLoaders';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 
@@ -52,7 +51,7 @@ export default function About() {
             ♥
           </motion.span>
           
-          <H1 className="mb-6 text-purple-primary">Tentang Kita</H1>
+          <H1 className="mb-6" style={{ color: '#4a3880' }}>Tentang Kita</H1>
           
           <P className="max-w-lg mx-auto text-lg text-purple-warm opacity-90">
             Cerita cinta kita, dalam kata-kata dari hatiku yang paling dalam
@@ -83,38 +82,34 @@ export default function About() {
                   key={chapter.id}
                   variants={itemVariants}
                 >
-                  <Card
-                    variant="minimal"
-                    padding="lg"
-                    className="hover:shadow-lg hover:border-purple-secondary/60 transition-all duration-300"
-                  >
-                    <CardContent className="flex gap-5 md:gap-6">
-                      {/* Icon circle */}
-                      <motion.div
-                        className="flex-shrink-0 mt-1"
-                        animate={{ scale: [1, 1.15, 1] }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
-                        }}
+                  <div className="card-lilac p-7 md:p-9 flex gap-6 group hover:scale-[1.01]">
+                    {/* Icon */}
+                    <motion.div
+                      className="shrink-0 mt-0.5"
+                      animate={{ scale: [1, 1.15, 1] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl"
+                        style={{ background: 'rgba(196,176,238,0.2)' }}
                       >
-                        <div className="w-12 h-12 bg-purple-secondary/20 rounded-full flex items-center justify-center text-xl text-purple-accent">
-                          {chapter.icon}
-                        </div>
-                      </motion.div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <H2 className="text-2xl mb-3 text-purple-primary font-serif-display">
-                          {chapter.title}
-                        </H2>
-                        <P className="text-neutral-dark leading-relaxed">
-                          {chapter.content}
-                        </P>
+                        {chapter.icon}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </motion.div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h2
+                        className="font-serif-display font-medium mb-3 leading-snug"
+                        style={{ fontSize: '1.3rem', color: '#4a3880' }}
+                      >
+                        {chapter.title}
+                      </h2>
+                      <p className="font-serif-body text-base leading-relaxed" style={{ color: 'rgba(114,80,200,0.65)' }}>
+                        {chapter.content}
+                      </p>
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>

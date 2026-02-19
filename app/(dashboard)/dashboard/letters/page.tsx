@@ -40,6 +40,7 @@ export default function LettersPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageId, setImageId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -64,7 +65,7 @@ export default function LettersPage() {
     enabled: isDirty,
   });
 
-  const { fetch: fetchLetters } = useFetch<Letter[]>('/api/letters');
+  const { fetch: fetchLetters } = useFetch<Letter[]>('/api/letters?published=false');
   const viewingItem = viewingId ? letters.find((l) => l.id === viewingId) : null;
 
   useEffect(() => {
@@ -108,6 +109,13 @@ export default function LettersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Client-side guard — content must be at least 20 characters
+    if (formData.content.length < 20) {
+      toast.error('Content must be at least 20 characters');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -127,8 +135,14 @@ export default function LettersPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to save letter');
+        const errorData = await response.json();
+        if (errorData.details?.length) {
+          const messages = errorData.details.map((d: { path: string; message: string }) =>
+            d.path ? `${d.path}: ${d.message}` : d.message
+          ).join(', ');
+          throw new Error(messages);
+        }
+        throw new Error(errorData.error || 'Failed to save letter');
       }
 
       await loadLetters();
@@ -427,6 +441,7 @@ export default function LettersPage() {
               </label>
               <MediaUploader
                 previewUrl={selectedImage || undefined}
+                onUploadingChange={setIsImageUploading}
                 onSuccess={(mediaId, url) => {
                   setImageId(mediaId);
                   setSelectedImage(url);
@@ -446,13 +461,13 @@ export default function LettersPage() {
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isImageUploading}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {loading && (
+                {(loading || isImageUploading) && (
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
-                {editingId ? 'Update' : 'Create'} Letter
+                {isImageUploading ? 'Uploading image...' : `${editingId ? 'Update' : 'Create'} Letter`}
               </button>
             </div>
           </form>
@@ -540,7 +555,7 @@ export default function LettersPage() {
                     <img
                       src={letter.image.publicUrl}
                       alt={letter.title}
-                      className="h-24 w-24 object-cover rounded-lg flex-shrink-0"
+                      className="h-24 w-24 object-cover rounded-lg shrink-0"
                     />
                   )}
                   <div className="flex-1 min-w-0">
