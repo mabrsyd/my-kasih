@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { memoryService } from '@/services';
 import { memorySchema } from '@/lib/validators/content';
@@ -50,6 +51,9 @@ export async function POST(request: NextRequest) {
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/memories');
+    revalidatePath('/');
 
     return NextResponse.json(memory, { status: 201 });
   } catch (error) {

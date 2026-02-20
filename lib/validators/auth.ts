@@ -25,7 +25,7 @@ export async function validateDashboardAccess(): Promise<AuthResult> {
     return { valid: true, clientIp };
   }
 
-  const key = headersList.get('x-dashboard-key');
+  const key = headersList.get('x-dashboard-token');
 
   // 1. Validate token
   if (!key || key !== DASHBOARD_KEY) {

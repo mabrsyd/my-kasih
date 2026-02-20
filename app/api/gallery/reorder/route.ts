@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { galleryService } from '@/services';
 import { headers } from 'next/headers';
@@ -7,7 +8,7 @@ import { z } from 'zod';
 const reorderSchema = z.object({
   items: z.array(
     z.object({
-      id: z.string().cuid(),
+      id: z.string().uuid(),
       order: z.number().int().nonnegative(),
     })
   ),
@@ -37,6 +38,8 @@ export async function PATCH(request: NextRequest) {
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/gallery');
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

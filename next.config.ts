@@ -33,6 +33,7 @@ const nextConfig: NextConfig = {
   headers: async () => {
     return [
       {
+        // Security headers for all routes
         source: '/:path*',
         headers: [
           {
@@ -51,6 +52,12 @@ const nextConfig: NextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
+        ],
+      },
+      {
+        // Aggressive caching ONLY for immutable static assets (JS/CSS/fonts)
+        source: '/_next/static/:path*',
+        headers: [
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
@@ -58,7 +65,8 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/public/:path*',
+        // Cache uploaded media files for 1 year (content-addressed)
+        source: '/uploads/:path*',
         headers: [
           {
             key: 'Cache-Control',

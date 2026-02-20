@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { settingsService } from '@/services';
 import { headers } from 'next/headers';
@@ -59,6 +60,8 @@ export async function POST(request: NextRequest) {
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/');
 
     return NextResponse.json(setting, { status: 200 });
   } catch (error) {

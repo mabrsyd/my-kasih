@@ -248,6 +248,18 @@ export const aboutRepository = {
     }
   },
 
+  async findById(id: string) {
+    try {
+      return await prisma.about.findUnique({ where: { id } });
+    } catch (error: any) {
+      if (error?.code === 'P2021') {
+        console.warn('[About] Table does not exist yet');
+        return null;
+      }
+      throw handlePrismaError(error, `findById(${id})`, 'About');
+    }
+  },
+
   async create(data: Prisma.AboutCreateInput) {
     try {
       return await prisma.about.create({ data });

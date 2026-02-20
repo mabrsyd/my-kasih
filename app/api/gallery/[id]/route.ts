@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { galleryService } from '@/services';
 import { galleryPartialSchema } from '@/lib/validators/content';
@@ -68,6 +69,8 @@ export async function PATCH(
       userAgent,
     });
 
+    revalidatePath('/gallery');
+
     return NextResponse.json(item, { status: 200 });
   } catch (error) {
     if (error instanceof ZodError) {
@@ -116,6 +119,8 @@ export async function DELETE(
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/gallery');
 
     return NextResponse.json(
       { success: true, message: 'Gallery item deleted' },

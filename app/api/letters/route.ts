@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { letterService } from '@/services';
 import { letterSchema } from '@/lib/validators/content';
@@ -50,6 +51,8 @@ export async function POST(request: NextRequest) {
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/letter');
 
     return NextResponse.json(letter, { status: 201 });
   } catch (error) {

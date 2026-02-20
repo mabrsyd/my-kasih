@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { settingsService } from '@/services';
 import { headers } from 'next/headers';
@@ -37,9 +38,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { messages } = body;
 
-    if (!Array.isArray(messages) || messages.length === 0) {
+    if (!Array.isArray(messages)) {
       return NextResponse.json(
-        { error: 'Messages must be a non-empty array of strings' },
+        { error: 'Messages must be an array of strings' },
         { status: 400 }
       );
     }
@@ -51,6 +52,8 @@ export async function POST(request: NextRequest) {
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/');
 
     return NextResponse.json(setting, { status: 200 });
   } catch (error) {

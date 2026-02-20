@@ -23,7 +23,7 @@ export function useUnsavedChanges({ isDirty, onSave }: UseUnsavedChangesOptions)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
 
-  return { showWarning: isDirty };
+  return { showWarning: isDirty, isDirty };
 }
 
 interface UnsavedChangesIndicatorProps {

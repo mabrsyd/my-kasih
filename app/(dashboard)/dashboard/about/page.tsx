@@ -63,9 +63,13 @@ export default function AboutPage() {
       const method = editingId ? 'PUT' : 'POST';
       const url = editingId ? `/api/about/${editingId}` : '/api/about';
 
+      const token = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard_token') : '';
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', 'X-Dashboard-Token': process.env.NEXT_PUBLIC_DASHBOARD_TOKEN || '' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'X-Dashboard-Token': token }),
+        },
         body: JSON.stringify(formData),
       });
 
@@ -91,9 +95,12 @@ export default function AboutPage() {
     if (!deleteId) return;
 
     try {
+      const token = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard_token') : '';
       const res = await fetch(`/api/about/${deleteId}`, {
         method: 'DELETE',
-        headers: { 'X-Dashboard-Token': process.env.NEXT_PUBLIC_DASHBOARD_TOKEN || '' },
+        headers: {
+          ...(token && { 'X-Dashboard-Token': token }),
+        },
       });
 
       if (!res.ok) throw new Error('Failed to delete');

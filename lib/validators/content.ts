@@ -51,7 +51,9 @@ export const letterSchema = z.object({
   published: z.boolean().default(false),
 });
 
-export const letterPartialSchema = letterSchema.partial();
+export const letterPartialSchema = letterSchema.partial().extend({
+  imageId: z.string().uuid().nullable().optional(),
+});
 
 export type LetterInput = z.infer<typeof letterSchema>;
 export type LetterUpdateInput = z.infer<typeof letterPartialSchema>;

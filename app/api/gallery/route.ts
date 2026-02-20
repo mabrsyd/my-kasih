@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
 
     // Revalidate public gallery page
     revalidatePath('/gallery');
+    revalidatePath('/');
 
     return NextResponse.json(item, { status: 201 });
   } catch (error) {

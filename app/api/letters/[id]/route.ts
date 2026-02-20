@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { letterService } from '@/services';
 import { letterPartialSchema } from '@/lib/validators/content';
@@ -68,6 +69,8 @@ export async function PATCH(
       userAgent,
     });
 
+    revalidatePath('/letter');
+
     return NextResponse.json(letter, { status: 200 });
   } catch (error) {
     if (error instanceof ZodError) {
@@ -116,6 +119,8 @@ export async function DELETE(
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/letter');
 
     return NextResponse.json(
       { success: true, message: 'Letter deleted' },

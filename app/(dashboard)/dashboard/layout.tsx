@@ -77,6 +77,18 @@ export default function DashboardLayout({
       isActive: pathname === '/dashboard',
     },
     {
+      label: 'Home',
+      href: '/dashboard/home',
+      icon: '🏠',
+      isActive: pathname.startsWith('/dashboard/home'),
+    },
+    {
+      label: 'About',
+      href: '/dashboard/about',
+      icon: '💜',
+      isActive: pathname.startsWith('/dashboard/about'),
+    },
+    {
       label: 'Memories',
       href: '/dashboard/memories',
       icon: '💭',

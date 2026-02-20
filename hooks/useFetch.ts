@@ -16,12 +16,16 @@ export function useFetch<T>(url: string) {
       setError(null);
 
       try {
+        const token =
+          typeof window !== 'undefined'
+            ? sessionStorage.getItem('dashboard_token')
+            : null;
+
         const response = await global.fetch(url, {
           method: options?.method || 'GET',
           headers: {
             'Content-Type': 'application/json',
-            // In development, validateDashboardAccess() bypasses auth check
-            // No need to send token header
+            ...(token ? { 'X-Dashboard-Token': token } : {}),
           },
           body: options?.body ? JSON.stringify(options.body) : undefined,
         });

@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { aboutService } from '@/services';
 import { headers } from 'next/headers';
+import { z } from 'zod';
+
+const aboutUpdateSchema = z.object({
+  icon: z.string().min(1).max(10).optional(),
+  title: z.string().min(2).max(255).optional(),
+  content: z.string().min(1).optional(),
+  order: z.number().int().optional(),
+});
 
 /**
  * PUT /api/about/[id]
@@ -22,24 +31,32 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { icon, title, content, order } = body;
+    const validated = aboutUpdateSchema.parse(body);
 
     const headersList = await headers();
     const userAgent = headersList.get('user-agent') || 'unknown';
 
     const about = await aboutService.update(
       id,
-      { icon, title, content, order },
+      validated,
       {
         ipAddress: auth.clientIp || 'unknown',
         userAgent,
       }
     );
 
+    revalidatePath('/about');
+
     return NextResponse.json(about, { status: 200 });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Validation error', details: error.errors.map(e => ({ path: e.path.join('.'), message: e.message })) },
+        { status: 400 }
+      );
+    }
     console.error('[API] PUT /about/[id]:', error);
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && (error.message.includes('not found') || error.message.includes('P2025'))) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
     return NextResponse.json(
@@ -75,6 +92,8 @@ export async function DELETE(
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/about');
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

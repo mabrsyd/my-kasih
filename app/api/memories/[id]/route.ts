@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { validateDashboardAccess } from '@/lib/validators/auth';
 import { memoryService } from '@/services';
 import { memoryPartialSchema } from '@/lib/validators/content';
@@ -70,6 +71,9 @@ export async function PATCH(
       userAgent,
     });
 
+    revalidatePath('/memories');
+    revalidatePath('/');
+
     return NextResponse.json(memory, { status: 200 });
   } catch (error) {
     if (error instanceof ZodError) {
@@ -122,6 +126,9 @@ export async function DELETE(
       ipAddress: auth.clientIp || 'unknown',
       userAgent,
     });
+
+    revalidatePath('/memories');
+    revalidatePath('/');
 
     return NextResponse.json(
       { success: true, message: 'Memory deleted' },

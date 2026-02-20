@@ -25,10 +25,13 @@ export default function DashboardPage() {
 
   const fetchStats = async () => {
     try {
+      const token = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard_token') ?? '' : '';
+      const authHeaders: Record<string, string> = token ? { 'X-Dashboard-Token': token } : {};
+
       const [memoriesRes, galleryRes, lettersRes] = await Promise.all([
-        fetch('/api/memories'),
-        fetch('/api/gallery'),
-        fetch('/api/letters'),
+        fetch('/api/memories?published=false', { headers: authHeaders }),
+        fetch('/api/gallery', { headers: authHeaders }),
+        fetch('/api/letters?published=false', { headers: authHeaders }),
       ]);
 
       // Check if responses are OK

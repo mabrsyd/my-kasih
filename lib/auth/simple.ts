@@ -17,6 +17,8 @@ export const simpleAuth = {
       if (typeof window !== 'undefined') {
         sessionStorage.setItem(AUTH_KEY, 'authenticated');
         sessionStorage.setItem('username', username);
+        // Store the token key that all dashboard pages read
+        sessionStorage.setItem('dashboard_token', process.env.NEXT_PUBLIC_DASHBOARD_KEY || 'authenticated');
       }
       return true;
     }
@@ -30,6 +32,7 @@ export const simpleAuth = {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem(AUTH_KEY);
       sessionStorage.removeItem('username');
+      sessionStorage.removeItem('dashboard_token');
     }
   },
 

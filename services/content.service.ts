@@ -274,7 +274,9 @@ export const letterService = {
       content: validated.content,
       order: validated.order,
       published: validated.published,
-      image: validated.imageId ? { connect: { id: validated.imageId } } : undefined,
+      image: validated.imageId !== undefined
+        ? (validated.imageId === null ? { disconnect: true } : { connect: { id: validated.imageId } })
+        : undefined,
     });
 
     await logAudit({
@@ -338,6 +340,9 @@ export const aboutService = {
   },
 
   async update(id: string, data: { icon?: string; title?: string; content?: string; order?: number }, auditData: AuditContext) {
+    const existing = await aboutRepository.findById(id);
+    if (!existing) throw new Error('About chapter not found');
+
     const about = await aboutRepository.update(id, data);
 
     await logAudit({
@@ -351,6 +356,9 @@ export const aboutService = {
   },
 
   async delete(id: string, auditData: AuditContext) {
+    const existing = await aboutRepository.findById(id);
+    if (!existing) throw new Error('About chapter not found');
+
     await aboutRepository.delete(id);
 
     await logAudit({
