@@ -71,12 +71,9 @@ export function MediaUploader({
       const formData = new FormData();
       formData.append('file', file);
 
-      const token = sessionStorage.getItem('dashboard_token');
+      // Auth.js v5: cookie dikirim otomatis, tidak perlu header token
       const response = await fetch('/api/media/upload', {
         method: 'POST',
-        headers: {
-          ...(token && { 'X-Dashboard-Token': token }),
-        },
         body: formData,
       });
 
@@ -135,7 +132,7 @@ export function MediaUploader({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full px-4 py-2 border-2 border-slate-300 rounded-lg text-slate-600 font-medium hover:border-pink-400 hover:text-pink-600 hover:border-pink-400 transition-colors text-sm"
+            className="w-full px-4 py-2 border-2 border-slate-300 rounded-lg text-slate-600 font-medium hover:border-pink-400 hover:text-pink-600 transition-colors text-sm"
           >
             🔄 Ganti Gambar
           </button>

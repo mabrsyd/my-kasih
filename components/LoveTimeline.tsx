@@ -51,7 +51,7 @@ export default function LoveTimeline({ items }: LoveTimelineProps) {
             <div className="flex-1">
               <motion.div
                 whileHover={{ y: -4 }}
-                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number] }}
                 className="glass rounded-2xl p-6 md:p-8 shadow-romantic hover-glow"
               >
                 {/* Date - whisper style */}
@@ -86,7 +86,7 @@ export default function LoveTimeline({ items }: LoveTimelineProps) {
                 transition={{
                   duration: 0.5,
                   delay: index * 0.1,
-                  ease: [0.4, 0, 0.2, 1]
+                  ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number]
                 }}
                 className="w-3 h-3 rounded-full bg-romantic-red/60 border-2 border-cream shadow-lg z-10"
               />

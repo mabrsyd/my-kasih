@@ -8,6 +8,8 @@ export { SortableGrid } from './SortableGrid';
 export { DetailView } from './DetailView';
 export { PublishToggle, StatusBadge } from './PublishToggle';
 export { EmptyState, DashboardEmptyState } from './EmptyState';
+export { DashboardPageHeader } from './DashboardPageHeader';
+export { DashboardCard, DashboardInsetCard } from './DashboardCard';
 export {
   RomanticLoader,
   SkeletonCard,

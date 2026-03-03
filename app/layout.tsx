@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Lora } from 'next/font/google';
 import './globals.css';
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '@/lib/constants';
+import { Providers } from '@/lib/providers';
 
 const playfair = Playfair_Display({
   variable: '--font-playfair',
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     type: 'website',
   },
-  robots: 'index, follow',
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
@@ -44,7 +45,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${playfair.variable} ${lora.variable} antialiased`}>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

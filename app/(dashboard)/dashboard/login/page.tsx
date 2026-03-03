@@ -1,157 +1,172 @@
+/**
+ * Dashboard Login Page
+ * Best Practice: React Hook Form + Zod validation + Auth.js signIn
+ */
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { simpleAuth, DEMO_CREDENTIALS } from '@/lib/auth/simple';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { LogIn, Loader2, Heart, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
 
-export default function DashboardLoginPage() {
+const loginSchema = z.object({
+  username: z.string().min(1, 'Username wajib diisi').max(50),
+  password: z.string().min(1, 'Password wajib diisi').min(4, 'Password minimal 4 karakter'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+function LoginForm() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState('');
 
-  useEffect(() => {
-    setMounted(true);
-    // Redirect if already authenticated (only check once on mount)
-    if (simpleAuth.isAuthenticated()) {
-      router.push('/dashboard');
-    }
-  }, []);  // Empty dependency array - only run once on mount
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { username: '', password: '' },
+  });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
+  const onSubmit = async (data: LoginFormValues) => {
+    setServerError('');
     try {
-      const success = simpleAuth.login(username, password);
+      const result = await signIn('credentials', {
+        username: data.username,
+        password: data.password,
+        redirect: false,
+      });
 
-      if (success) {
-        router.push('/dashboard');
-      } else {
-        setError('Invalid username or password. Please try again.');
+      if (result?.error) {
+        setServerError('Username atau password salah. Silakan coba lagi.');
+        return;
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
+
+      router.push(callbackUrl);
+      router.refresh();
+    } catch {
+      setServerError('Terjadi kesalahan. Silakan coba lagi.');
     }
   };
 
-  if (!mounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="inline-flex w-12 h-12 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-          <p className="text-slate-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-rose-50 px-4">
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">
-              My Kasih
-            </h1>
-            <h2 className="text-xl font-semibold text-slate-700 mb-2">
-              Dashboard
-            </h2>
-            <p className="text-slate-500 text-sm">
-              Sign in to your account to continue
-            </p>
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-rose-50 rounded-2xl mb-4">
+              <Heart className="w-8 h-8 text-rose-500" />
+            </div>
+            <h1 className="text-3xl font-bold text-slate-900">My Kasih</h1>
+            <p className="text-slate-500 text-sm mt-2">Masuk ke dashboard CMS</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username Field */}
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+            {/* Username */}
             <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-slate-700 mb-2"
-              >
+              <label htmlFor="username" className="block text-sm font-medium text-slate-700 mb-1.5">
                 Username
               </label>
               <input
                 id="username"
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
-                disabled={isLoading}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
-                required
                 autoComplete="username"
+                {...register('username')}
+                disabled={isSubmitting}
+                placeholder="Masukkan username"
+                className={`w-full px-4 py-3 border rounded-lg bg-white text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed ${
+                  errors.username ? 'border-red-400 bg-red-50' : 'border-slate-300'
+                }`}
               />
+              {errors.username && (
+                <p className="text-red-500 text-xs mt-1.5">{errors.username.message}</p>
+              )}
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-slate-700 mb-2"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                disabled={isLoading}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
-                required
-                autoComplete="current-password"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  {...register('password')}
+                  disabled={isSubmitting}
+                  placeholder="Masukkan password"
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg bg-white text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed ${
+                    errors.password ? 'border-red-400 bg-red-50' : 'border-slate-300'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1.5">{errors.password.message}</p>
+              )}
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-700 text-sm font-medium">{error}</p>
+            {/* Server Error */}
+            {serverError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-600 text-sm">{serverError}</p>
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-6"
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed mt-2"
             >
-              {isLoading && (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Masuk...
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-4 h-4" />
+                  Masuk
+                </>
               )}
-              {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-slate-200">
-            <p className="text-slate-500 text-center text-xs">
-              Demo credentials: {DEMO_CREDENTIALS.username} / {DEMO_CREDENTIALS.password}
-            </p>
-          </div>
         </div>
 
-        {/* Back to Home Link */}
+        {/* Back to Home */}
         <div className="mt-6 text-center">
-          <a
-            href="/"
-            className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
-          >
-            ← Back to Home
-          </a>
+          <Link href="/" className="text-slate-500 hover:text-rose-500 text-sm transition-colors">
+            ← Kembali ke Beranda
+          </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardLoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

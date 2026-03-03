@@ -3,6 +3,7 @@ import Footer from '@/components/Footer';
 import HeartCursor from '@/components/HeartCursor';
 import MusicPlayer from '@/components/MusicPlayer';
 import RomanticBackground from '@/components/RomanticBackground';
+import KonamiEgg from '@/components/KonamiEgg';
 
 export default function PublicLayout({
     children,
@@ -13,6 +14,7 @@ export default function PublicLayout({
         <>
             <RomanticBackground />
             <HeartCursor />
+            <KonamiEgg />
             <Navbar />
             <main className="pt-16 min-h-screen">{children}</main>
             <MusicPlayer />

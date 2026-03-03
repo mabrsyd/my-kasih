@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import { PARTNER_NAME, YOUR_NAME } from '@/lib/constants';
 
 export default function MusicPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -144,7 +145,7 @@ export default function MusicPlayer() {
 
         {/* Cassette Details */}
         <div className="mt-3 text-center text-xs text-gray-400 font-mono">
-          <p>Rosyid & Ennou</p>
+          <p>{YOUR_NAME} &amp; {PARTNER_NAME}</p>
           <p className="text-purple-400">♥ Forever ♥</p>
         </div>
       </div>

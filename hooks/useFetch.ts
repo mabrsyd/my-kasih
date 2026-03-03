@@ -16,16 +16,12 @@ export function useFetch<T>(url: string) {
       setError(null);
 
       try {
-        const token =
-          typeof window !== 'undefined'
-            ? sessionStorage.getItem('dashboard_token')
-            : null;
-
+        // Auth.js v5 menggunakan HTTP-only cookie secara otomatis
+        // Tidak perlu mengirim token secara manual
         const response = await global.fetch(url, {
           method: options?.method || 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(token ? { 'X-Dashboard-Token': token } : {}),
           },
           body: options?.body ? JSON.stringify(options.body) : undefined,
         });

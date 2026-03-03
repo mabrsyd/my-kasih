@@ -1,169 +1,135 @@
+/**
+ * Dashboard Overview
+ */
 'use client';
 
-import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-interface Stats {
-  totalMemories: number;
-  totalGallery: number;
-  totalLetters: number;
-  publishedLetters: number;
-}
+import { Brain, Image, Mail, MailOpen, Settings, Loader2, BookOpen, LayoutDashboard } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useDashboardStats } from '@/lib/hooks/queries';
+import { DashboardCard } from '@/components/dashboard';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<Stats>({
-    totalMemories: 0,
-    totalGallery: 0,
-    totalLetters: 0,
-    publishedLetters: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
+  const { data: stats, isLoading, isError } = useDashboardStats();
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  const username = session?.user?.name || 'Admin';
 
-  const fetchStats = async () => {
-    try {
-      const token = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard_token') ?? '' : '';
-      const authHeaders: Record<string, string> = token ? { 'X-Dashboard-Token': token } : {};
-
-      const [memoriesRes, galleryRes, lettersRes] = await Promise.all([
-        fetch('/api/memories?published=false', { headers: authHeaders }),
-        fetch('/api/gallery', { headers: authHeaders }),
-        fetch('/api/letters?published=false', { headers: authHeaders }),
-      ]);
-
-      // Check if responses are OK
-      const memories = memoriesRes.ok ? await memoriesRes.json() : [];
-      const gallery = galleryRes.ok ? await galleryRes.json() : [];
-      const letters = lettersRes.ok ? await lettersRes.json() : [];
-
-      setStats({
-        totalMemories: Array.isArray(memories) ? memories.length : 0,
-        totalGallery: Array.isArray(gallery) ? gallery.length : 0,
-        totalLetters: Array.isArray(letters) ? letters.length : 0,
-        publishedLetters: Array.isArray(letters)
-          ? letters.filter((l: any) => l.published).length
-          : 0,
-      });
-    } catch (error) {
-      console.error('Failed to fetch stats:', error);
-      // Set default values on error
-      setStats({
-        totalMemories: 0,
-        totalGallery: 0,
-        totalLetters: 0,
-        publishedLetters: 0,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-slate-600">Loading statistics...</div>
+      <div className="flex items-center justify-center py-32">
+        <Loader2 className="w-7 h-7 text-violet-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (isError || !stats) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 text-slate-500 gap-3">
+        <span className="text-4xl">😔</span>
+        <p className="text-sm">Gagal memuat statistik. Coba refresh halaman.</p>
       </div>
     );
   }
 
   const statCards = [
     {
-      title: 'Memories',
+      title: 'Kenangan',
       count: stats.totalMemories,
-      icon: '💭',
+      Icon: Brain,
       href: '/dashboard/memories',
-      color: 'rose',
+      description: 'momen tersimpan',
     },
     {
-      title: 'Gallery',
+      title: 'Galeri',
       count: stats.totalGallery,
-      icon: '🖼️',
+      Icon: Image,
       href: '/dashboard/gallery',
-      color: 'pink',
+      description: 'foto tersimpan',
     },
     {
-      title: 'Letters',
+      title: 'Surat',
       count: stats.totalLetters,
-      icon: '💌',
+      Icon: Mail,
       href: '/dashboard/letters',
-      color: 'red',
+      description: 'total surat',
     },
     {
-      title: 'Published Letters',
+      title: 'Diterbitkan',
       count: stats.publishedLetters,
-      icon: '📬',
+      Icon: MailOpen,
       href: '/dashboard/letters',
-      color: 'amber',
+      description: 'surat publik',
     },
   ];
 
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
-        <p className="text-slate-600">
-          Manage your romantic content with ease
-        </p>
-      </div>
+  const quickActions = [
+    { label: 'Kenangan Baru', href: '/dashboard/memories', Icon: Brain },
+    { label: 'Foto Galeri Baru', href: '/dashboard/gallery', Icon: Image },
+    { label: 'Surat Baru', href: '/dashboard/letters', Icon: Mail },
+    { label: 'Halaman Depan', href: '/dashboard/home', Icon: LayoutDashboard },
+    { label: 'Tentang Kita', href: '/dashboard/about', Icon: BookOpen },
+    { label: 'Pengaturan', href: '/dashboard/settings', Icon: Settings },
+  ];
 
-      {/* Statistics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {statCards.map((card) => (
+  return (
+    <div className="space-y-6">
+      {/* Greeting */}
+      <DashboardCard>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">
+              Halo, {username} 💜
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Kelola kenangan indah dengan mudah dari sini.
+            </p>
+          </div>
           <Link
-            key={card.title}
-            href={card.href}
-            className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow cursor-pointer group"
+            href="/"
+            target="_blank"
+            className="text-xs text-violet-600 hover:text-violet-700 underline underline-offset-2"
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium mb-2">
-                  {card.title}
-                </p>
-                <p className="text-4xl font-bold text-slate-900">
-                  {card.count}
-                </p>
+            Lihat situs →
+          </Link>
+        </div>
+      </DashboardCard>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map(({ title, count, Icon, href, description }) => (
+          <Link
+            key={title}
+            href={href}
+            className="bg-white rounded-xl border border-slate-200 p-5 hover:border-violet-200 hover:shadow-md transition-all group"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-violet-50 text-violet-600 group-hover:bg-violet-100 transition-colors">
+                <Icon className="w-5 h-5" />
               </div>
-              <div className="text-4xl opacity-75 group-hover:opacity-100 transition-opacity">
-                {card.icon}
-              </div>
+              <span className="text-3xl font-bold text-slate-900">{count}</span>
             </div>
+            <p className="text-sm font-medium text-slate-700">{title}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{description}</p>
           </Link>
         ))}
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-xl font-bold text-slate-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link
-            href="/dashboard/memories?new=true"
-            className="px-4 py-3 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 transition-colors text-center"
-          >
-            ➕ New Memory
-          </Link>
-          <Link
-            href="/dashboard/gallery?new=true"
-            className="px-4 py-3 bg-pink-500 text-white rounded-lg font-medium hover:bg-pink-600 transition-colors text-center"
-          >
-            ➕ New Gallery Item
-          </Link>
-          <Link
-            href="/dashboard/letters?new=true"
-            className="px-4 py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors text-center"
-          >
-            ➕ New Letter
-          </Link>
-          <Link
-            href="/dashboard/settings"
-            className="px-4 py-3 bg-slate-500 text-white rounded-lg font-medium hover:bg-slate-600 transition-colors text-center"
-          >
-            ⚙️ Settings
-          </Link>
+      <DashboardCard title="Akses Cepat" description="Navigasi langsung ke halaman yang kamu butuhkan">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {quickActions.map(({ label, href, Icon }) => (
+            <Link
+              key={label}
+              href={href}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-200 hover:border-violet-200 hover:bg-violet-50 text-slate-700 hover:text-violet-700 transition-all text-sm font-medium"
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              {label}
+            </Link>
+          ))}
         </div>
-      </div>
+      </DashboardCard>
     </div>
   );
 }

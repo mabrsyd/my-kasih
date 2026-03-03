@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import './FlowerAnimation.css';
 
@@ -150,20 +150,33 @@ const FlowerGroup = ({ mirrored = false }: FlowerGroupProps) => {
 
 export default function FlowerAnimation() {
     const router = useRouter();
+    const [isVisible, setIsVisible] = useState(false);
+    const [isLeaving, setIsLeaving] = useState(false);
     
     useEffect(() => {
-        const timer = setTimeout(() => {
+        document.body.classList.add('not-loaded');
+
+        // Start CSS animations, then fade in the page
+        const showTimer = setTimeout(() => {
             document.body.classList.remove('not-loaded');
         }, 1000);
 
-        // Add class on mount
-        document.body.classList.add('not-loaded');
+        // Fade-in overlay disappears after CSS is ready
+        const visibleTimer = setTimeout(() => {
+            setIsVisible(true);
+        }, 200);
 
         return () => {
-            clearTimeout(timer);
+            clearTimeout(showTimer);
+            clearTimeout(visibleTimer);
             document.body.classList.remove('not-loaded');
         };
     }, []);
+
+    const handleBack = () => {
+        setIsLeaving(true);
+        setTimeout(() => router.back(), 650);
+    };
 
     return (
         <div 
@@ -182,24 +195,40 @@ export default function FlowerAnimation() {
             margin: 0,
           }}
         >
+            {/* Fade overlay: in on load, out on leave */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: '#000',
+                zIndex: 50,
+                pointerEvents: 'none',
+                opacity: isVisible && !isLeaving ? 0 : 1,
+                transition: isLeaving
+                  ? 'opacity 0.6s ease-in'
+                  : 'opacity 0.8s ease-out',
+              }}
+            />
             {/* Back Button */}
             <button
-              onClick={() => router.back()}
+              onClick={() => handleBack()}
               style={{
                 position: 'absolute',
                 top: '2rem',
                 left: '2rem',
-                zIndex: 30,
+                zIndex: 60,
                 background: 'rgba(216, 180, 254, 0.2)',
                 border: '2px solid #d8b4fe',
                 color: '#d8b4fe',
                 padding: '0.75rem 1.5rem',
                 borderRadius: '8px',
-                cursor: 'pointer',
+                cursor: isVisible ? 'pointer' : 'default',
                 fontSize: '1rem',
                 fontFamily: 'serif',
-                transition: 'all 0.3s ease',
+                opacity: isVisible && !isLeaving ? 1 : 0,
+                transition: 'opacity 0.8s ease-out, background 0.3s ease, transform 0.3s ease',
                 backdropFilter: 'blur(10px)',
+                pointerEvents: isVisible && !isLeaving ? 'auto' : 'none',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(216, 180, 254, 0.4)';

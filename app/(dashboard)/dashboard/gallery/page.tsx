@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useFetch, useUnsavedChanges, UnsavedChangesIndicator, useAutoSaveDraft } from '@/hooks';
@@ -11,6 +11,8 @@ import {
   LoadingSpinner,
   DetailView,
   DashboardEmptyState,
+  DashboardPageHeader,
+  DashboardCard,
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -91,7 +93,7 @@ export default function GalleryPage() {
       setItems(data || []);
     } catch (error) {
       console.error('Failed to load gallery:', error);
-      toast.error('Failed to load gallery');
+      toast.error('Gagal memuat galeri');
     } finally {
       setInitialLoading(false);
     }
@@ -102,20 +104,18 @@ export default function GalleryPage() {
     setLoading(true);
 
     if (!imageId && !editingId) {
-      toast.error('Please select an image');
+      toast.error('Pilih foto terlebih dahulu');
       setLoading(false);
       return;
     }
 
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       const url = editingId ? `/api/gallery/${editingId}` : '/api/gallery';
 
       const response = await fetch(url, {
         method: editingId ? 'PATCH' : 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'X-Dashboard-Token': token }),
         },
         body: JSON.stringify({
           ...formData,
@@ -125,7 +125,7 @@ export default function GalleryPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to save gallery item');
+        throw new Error(error.error || 'Gagal menyimpan foto');
       }
 
       await loadGallery();
@@ -136,10 +136,10 @@ export default function GalleryPage() {
       setSelectedImage(null);
       setImageId(null);
       clearDraft();
-      toast.success(editingId ? 'Gallery item updated!' : 'Gallery item created!');
+      toast.success(editingId ? 'Foto berhasil diperbarui!' : 'Foto berhasil ditambahkan!');
     } catch (error) {
       console.error('Error saving gallery item:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save item');
+      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan foto');
     } finally {
       setLoading(false);
     }
@@ -149,39 +149,35 @@ export default function GalleryPage() {
     if (!deleteId) return;
 
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       const response = await fetch(`/api/gallery/${deleteId}`, {
         method: 'DELETE',
         headers: {
-          ...(token && { 'X-Dashboard-Token': token }),
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete item');
+        throw new Error('Gagal menghapus foto');
       }
 
       await loadGallery();
       setShowConfirm(false);
       setDeleteId(null);
-      toast.success('Gallery item deleted');
+      toast.success('Foto berhasil dihapus');
     } catch (error) {
       console.error('Error deleting item:', error);
-      toast.error('Failed to delete item');
+      toast.error('Gagal menghapus foto');
     }
   };
 
   const handleBatchDelete = async () => {
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       
       await Promise.all(
         Array.from(selectedItems).map((id) =>
           fetch(`/api/gallery/${id}`, {
             method: 'DELETE',
             headers: {
-              ...(token && { 'X-Dashboard-Token': token }),
-            },
+              },
           })
         )
       );
@@ -189,10 +185,10 @@ export default function GalleryPage() {
       await loadGallery();
       setSelectedItems(new Set());
       setShowBatchConfirm(false);
-      toast.success(`${selectedItems.size} items deleted`);
+      toast.success(`${selectedItems.size} foto berhasil dihapus`);
     } catch (error) {
       console.error('Error deleting items:', error);
-      toast.error('Failed to delete some items');
+      toast.error('Gagal menghapus beberapa foto');
     }
   };
 
@@ -221,12 +217,10 @@ export default function GalleryPage() {
       setItems(itemsWithNewOrder);
 
       try {
-        const token = sessionStorage.getItem('dashboard_token');
-        const response = await fetch('/api/gallery/reorder', {
+          const response = await fetch('/api/gallery/reorder', {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { 'X-Dashboard-Token': token }),
           },
           body: JSON.stringify({
             items: itemsWithNewOrder.map((item, index) => ({
@@ -240,7 +234,7 @@ export default function GalleryPage() {
           throw new Error('Failed to reorder items');
         }
 
-        toast.success('Gallery reordered');
+        toast.success('Urutan galeri disimpan');
       } catch (error) {
         // Revert on error
         setItems(previousItems);
@@ -282,37 +276,42 @@ export default function GalleryPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Gallery</h1>
-          <p className="text-slate-600 text-sm mt-1">
-            {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}
-            {searchQuery && ` (filtered from ${items.length})`}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {selectedItems.size > 0 && (
-            <button
-              onClick={() => setShowBatchConfirm(true)}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
-            >
-              Delete {selectedItems.size} Selected
-            </button>
-          )}
-          <button
-            onClick={() => {
-              setEditingId(null);
-              setFormData({ title: '', description: '' });
-              setSelectedImage(null);
-              setImageId(null);
-              setShowForm(!showForm);
-            }}
-            className="px-4 py-2 bg-pink-500 text-white rounded-lg font-medium hover:bg-pink-600 transition-colors"
-          >
-            {showForm ? '✖️ Cancel' : '➕ New Item'}
-          </button>
-        </div>
-      </div>
+      <DashboardPageHeader
+        title="Galeri Foto"
+        description={`${filteredItems.length} foto${searchQuery ? ` (dari ${items.length})` : ''}`}
+        badge={items.length}
+        action={
+          showForm
+            ? undefined
+            : {
+                label: 'Foto Baru',
+                onClick: () => {
+                  setEditingId(null);
+                  setFormData({ title: '', description: '' });
+                  setOriginalFormData({ title: '', description: '' });
+                  setSelectedImage(null);
+                  setImageId(null);
+                  setShowForm(true);
+                },
+              }
+        }
+        secondaryAction={
+          showForm
+            ? {
+                label: 'Batalkan',
+                onClick: () => {
+                  setShowForm(false);
+                  setEditingId(null);
+                },
+              }
+            : selectedItems.size > 0
+            ? {
+                label: `Hapus ${selectedItems.size} Dipilih`,
+                onClick: () => setShowBatchConfirm(true),
+              }
+            : undefined
+        }
+      />
 
       {/* Search */}
       <SearchInput
@@ -326,15 +325,15 @@ export default function GalleryPage() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="bg-slate-50 rounded-xl border border-slate-200 p-6"
+          className="bg-white rounded-xl border border-slate-200 p-6"
         >
-          <h2 className="text-lg font-bold text-slate-900 mb-4">
-            {editingId ? 'Edit Gallery Item' : 'New Gallery Item'}
+          <h2 className="text-base font-semibold text-slate-900 mb-5">
+            {editingId ? 'Edit Foto' : 'Tambah Foto Baru'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Title *
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Judul <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
@@ -342,30 +341,30 @@ export default function GalleryPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                placeholder="Gallery item title"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                placeholder="Judul foto..."
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Description
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Deskripsi
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Item details..."
+                placeholder="Cerita singkat tentang foto ini..."
                 rows={3}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Image *
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Foto <span className="text-red-400">*</span>
               </label>
               <MediaUploader
                 previewUrl={selectedImage || undefined}
@@ -373,29 +372,29 @@ export default function GalleryPage() {
                 onSuccess={(mediaId, url) => {
                   setImageId(mediaId);
                   setSelectedImage(url);
-                  toast.success('Image uploaded');
+                  toast.success('Foto berhasil diunggah');
                 }}
                 onError={(error) => toast.error(error)}
               />
             </div>
 
-            <div className="flex gap-3 justify-end pt-4">
+            <div className="flex gap-3 justify-end pt-2">
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                className="px-4 py-2.5 text-slate-700 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
               >
-                Cancel
+                Batal
               </button>
               <button
                 type="submit"
                 disabled={loading || isImageUploading}
-                className="px-4 py-2 bg-pink-500 text-white rounded-lg font-medium hover:bg-pink-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
               >
                 {(loading || isImageUploading) && (
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
-                {isImageUploading ? 'Uploading image...' : `${editingId ? 'Update' : 'Create'} Item`}
+                {isImageUploading ? 'Mengunggah...' : editingId ? 'Simpan Perubahan' : 'Tambah Foto'}
               </button>
             </div>
           </form>
@@ -410,15 +409,15 @@ export default function GalleryPage() {
               type="checkbox"
               checked={selectedItems.size === paginatedItems.length && paginatedItems.length > 0}
               onChange={toggleSelectAll}
-              className="w-4 h-4 rounded border-slate-300 text-pink-500 focus:ring-pink-500"
+              className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
             />
             <span className="text-sm font-medium text-slate-700">
-              Select all on this page
+              Pilih semua di halaman ini
             </span>
           </label>
           {selectedItems.size > 0 && (
             <span className="text-sm text-slate-600">
-              {selectedItems.size} selected
+              {selectedItems.size} dipilih
             </span>
           )}
         </div>
@@ -483,31 +482,27 @@ export default function GalleryPage() {
                 />
               </div>
               <div className="p-4">
-                <h3 className="font-bold text-slate-900 mb-2 line-clamp-2">
+                <h3 className="font-semibold text-slate-900 mb-1.5 line-clamp-2 text-sm">
                   {item.title}
                 </h3>
-                <p className="text-slate-600 text-sm line-clamp-2 mb-4">
-                  {item.description || 'No description'}
+                <p className="text-slate-500 text-xs line-clamp-2 mb-4">
+                  {item.description || 'Tidak ada deskripsi'}
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setViewingId(item.id)}
-                    className="flex-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 px-3 py-2 text-sm font-medium text-violet-700 bg-violet-50 rounded-lg hover:bg-violet-100 transition-colors"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    View
+                    Lihat
                   </button>
                   <button
                     onClick={() => {
                       setDeleteId(item.id);
                       setShowConfirm(true);
                     }}
-                    className="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                    className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                   >
-                    🗑️
+                    Hapus
                   </button>
                 </div>
               </div>
@@ -534,8 +529,8 @@ export default function GalleryPage() {
       {/* Confirm Delete Single */}
       <ConfirmDialog
         isOpen={showConfirm}
-        title="Delete Gallery Item"
-        message="Are you sure you want to delete this gallery item? This action cannot be undone."
+        title="Hapus Foto"
+        message="Yakin ingin menghapus foto ini? Tindakan ini tidak bisa dibatalkan."
         onConfirm={handleDelete}
         onCancel={() => {
           setShowConfirm(false);
@@ -546,8 +541,8 @@ export default function GalleryPage() {
       {/* Confirm Batch Delete */}
       <ConfirmDialog
         isOpen={showBatchConfirm}
-        title={`Delete ${selectedItems.size} Items`}
-        message={`Are you sure you want to delete ${selectedItems.size} gallery items? This action cannot be undone.`}
+        title={`Hapus ${selectedItems.size} Foto`}
+        message={`Yakin ingin menghapus ${selectedItems.size} foto? Tindakan ini tidak bisa dibatalkan.`}
         onConfirm={handleBatchDelete}
         onCancel={() => setShowBatchConfirm(false)}
       />

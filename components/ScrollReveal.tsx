@@ -56,7 +56,7 @@ export default function ScrollReveal({
       transition: {
         duration,
         delay,
-        ease: [0.4, 0, 0.2, 1],
+        ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number],
       },
     },
   };
@@ -112,7 +112,7 @@ export function ParagraphReveal({
       filter: 'blur(0px)',
       transition: {
         duration: 1,
-        ease: [0.4, 0, 0.2, 1],
+        ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number],
       },
     },
   };
@@ -184,7 +184,7 @@ export function StaggerReveal({
       y: 0,
       transition: {
         duration: 0.6,
-        ease: [0.4, 0, 0.2, 1],
+        ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number],
       },
     },
   };

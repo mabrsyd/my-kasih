@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import MemoryCard from '@/components/MemoryCard';
 import MomentOfSilence from '@/components/MomentOfSilence';
+import OnThisDay from '@/components/OnThisDay';
 import ScrollReveal from '@/components/ScrollReveal';
 import { cinematicFadeVariants } from '@/lib/animations';
 import { H1, P, Whisper } from '@/components/ui/Typography';
@@ -56,6 +57,13 @@ export default function MemoriesClient({ initialMemories }: Props) {
             perjalanan waktu
           </P>
         </motion.div>
+      </section>
+
+      {/* On This Day — appears only when there’s a matching memory */}
+      <section className="section-breathe">
+        <div className="max-w-xl mx-auto px-4">
+          <OnThisDay memories={initialMemories} />
+        </div>
       </section>
 
       {/* Timeline section */}

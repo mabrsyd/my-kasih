@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import { useFetch } from '@/hooks';
@@ -8,6 +8,7 @@ import {
   SearchInput,
   Pagination,
   LoadingSpinner,
+  DashboardPageHeader,
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -80,7 +81,7 @@ export default function MemoriesPage() {
       setMemories(data || []);
     } catch (error) {
       console.error('Failed to load memories:', error);
-      toast.error('Failed to load memories');
+      toast.error('Gagal memuat kenangan');
     } finally {
       setInitialLoading(false);
     }
@@ -91,14 +92,13 @@ export default function MemoriesPage() {
 
     // Client-side guard — cover image is required
     if (!coverId) {
-      toast.error('Please select and upload a cover image first');
+      toast.error('Pilih dan unggah foto sampul terlebih dahulu');
       return;
     }
 
     setLoading(true);
 
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       const url = editingId
         ? `/api/memories/${editingId}`
         : '/api/memories';
@@ -107,7 +107,6 @@ export default function MemoriesPage() {
         method: editingId ? 'PATCH' : 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'X-Dashboard-Token': token }),
         },
         body: JSON.stringify({
           ...formData,
@@ -146,10 +145,10 @@ export default function MemoriesPage() {
       setCoverId(null);
       setIsPublished(false);
       setOriginalPublishedAt(null);
-      toast.success(editingId ? 'Memory updated!' : 'Memory created!');
+      toast.success(editingId ? 'Kenangan berhasil diperbarui!' : 'Kenangan berhasil ditambahkan!');
     } catch (error) {
       console.error('Error saving memory:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save memory');
+      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan kenangan');
     } finally {
       setLoading(false);
     }
@@ -159,25 +158,23 @@ export default function MemoriesPage() {
     if (!deleteId) return;
 
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       const response = await fetch(`/api/memories/${deleteId}`, {
         method: 'DELETE',
         headers: {
-          ...(token && { 'X-Dashboard-Token': token }),
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete memory');
+        throw new Error('Gagal menghapus kenangan');
       }
 
       await loadMemories();
       setShowConfirm(false);
       setDeleteId(null);
-      toast.success('Memory deleted');
+      toast.success('Kenangan berhasil dihapus');
     } catch (error) {
       console.error('Error deleting memory:', error);
-      toast.error('Failed to delete memory');
+      toast.error('Gagal menghapus kenangan');
     }
   };
 
@@ -198,15 +195,13 @@ export default function MemoriesPage() {
 
   const handleBatchDelete = async () => {
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       
       await Promise.all(
         Array.from(selectedItems).map((id) =>
           fetch(`/api/memories/${id}`, {
             method: 'DELETE',
             headers: {
-              ...(token && { 'X-Dashboard-Token': token }),
-            },
+              },
           })
         )
       );
@@ -214,10 +209,10 @@ export default function MemoriesPage() {
       await loadMemories();
       setSelectedItems(new Set());
       setShowBatchConfirm(false);
-      toast.success(`${selectedItems.size} memories deleted`);
+      toast.success(`${selectedItems.size} kenangan berhasil dihapus`);
     } catch (error) {
       console.error('Error deleting memories:', error);
-      toast.error('Failed to delete some memories');
+      toast.error('Gagal menghapus beberapa kenangan');
     }
   };
 
@@ -252,48 +247,49 @@ export default function MemoriesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Memories</h1>
-          <p className="text-slate-600 text-sm mt-1">
-            {filteredMemories.length} memory{filteredMemories.length !== 1 ? 'ies' : ''}
-            {searchQuery && ` (filtered from ${memories.length})`}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {selectedItems.size > 0 && (
-            <button
-              onClick={() => setShowBatchConfirm(true)}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
-            >
-              Delete {selectedItems.size} Selected
-            </button>
-          )}
-          <button
-            onClick={() => {
-              setEditingId(null);
-              setFormData({
-                date: new Date().toISOString().split('T')[0],
-                title: '',
-                description: '',
-                emoji: '💕',
-              });
-              setCoverImage(null);
-              setCoverId(null);
-              setIsPublished(false);
-              setOriginalPublishedAt(null);
-              setShowForm(!showForm);
-            }}
-            className="px-4 py-2 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 transition-colors"
-          >
-            {showForm ? '✖️ Cancel' : '➕ New Memory'}
-          </button>
-        </div>
-      </div>
+      <DashboardPageHeader
+        title="Kenangan"
+        description={`${filteredMemories.length} kenangan${searchQuery ? ` (dari ${memories.length})` : ''}`}
+        badge={memories.length}
+        action={
+          showForm
+            ? undefined
+            : {
+                label: 'Kenangan Baru',
+                onClick: () => {
+                  setEditingId(null);
+                  setFormData({
+                    date: new Date().toISOString().split('T')[0],
+                    title: '',
+                    description: '',
+                    emoji: '💕',
+                  });
+                  setCoverImage(null);
+                  setCoverId(null);
+                  setIsPublished(false);
+                  setOriginalPublishedAt(null);
+                  setShowForm(true);
+                },
+              }
+        }
+        secondaryAction={
+          showForm
+            ? {
+                label: 'Batalkan',
+                onClick: () => { setShowForm(false); setEditingId(null); },
+              }
+            : selectedItems.size > 0
+            ? {
+                label: `Hapus ${selectedItems.size} Dipilih`,
+                onClick: () => setShowBatchConfirm(true),
+              }
+            : undefined
+        }
+      />
 
       {/* Search */}
       <SearchInput
-        placeholder="Search memories by title or description..."
+        placeholder="Cari kenangan berdasarkan judul atau deskripsi..."
         onSearch={setSearchQuery}
       />
 
@@ -309,7 +305,7 @@ export default function MemoriesPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Date
+                  Tanggal
                 </label>
                 <input
                   type="date"
@@ -317,7 +313,7 @@ export default function MemoriesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -331,14 +327,14 @@ export default function MemoriesPage() {
                     setFormData({ ...formData, emoji: e.target.value })
                   }
                   maxLength={2}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Title
+                Judul
               </label>
               <input
                 type="text"
@@ -346,24 +342,24 @@ export default function MemoriesPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                placeholder="Memory title"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                placeholder="Judul kenangan"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Description
+                Deskripsi
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Memory details..."
+                placeholder="Ceritakan kenangan ini..."
                 rows={4}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
               />
             </div>
 
@@ -377,7 +373,7 @@ export default function MemoriesPage() {
                 onSuccess={(mediaId, url) => {
                   setCoverId(mediaId);
                   setCoverImage(url);
-                  toast.success('Image uploaded');
+                  toast.success('Foto sampul berhasil diunggah');
                 }}
                 onError={(error) => toast.error(error)}
               />
@@ -393,14 +389,14 @@ export default function MemoriesPage() {
                   onChange={(e) => setIsPublished(e.target.checked)}
                 />
                 <div className={`w-10 h-6 rounded-full transition-colors ${
-                  isPublished ? 'bg-rose-500' : 'bg-slate-300'
+                  isPublished ? 'bg-violet-600' : 'bg-slate-300'
                 }`} />
                 <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
                   isPublished ? 'translate-x-4' : 'translate-x-0'
                 }`} />
               </div>
               <span className="text-sm font-medium text-slate-700">
-                {isPublished ? '🌸 Published' : '📝 Draft'}
+                {isPublished ? '🌸 Diterbitkan' : '📝 Draft'}
               </span>
             </label>
 
@@ -408,19 +404,19 @@ export default function MemoriesPage() {
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
               >
-                Cancel
+                Batal
               </button>
               <button
                 type="submit"
                 disabled={loading || isImageUploading}
-                className="px-4 py-2 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {loading && (
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
-                {isImageUploading ? 'Uploading image...' : editingId ? 'Update' : 'Create'} Memory
+                {isImageUploading ? 'Mengunggah gambar...' : editingId ? 'Simpan Perubahan' : 'Tambah Kenangan'}
               </button>
             </div>
           </form>
@@ -435,15 +431,15 @@ export default function MemoriesPage() {
               type="checkbox"
               checked={selectedItems.size === paginatedMemories.length && paginatedMemories.length > 0}
               onChange={toggleSelectAll}
-              className="w-4 h-4 rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+              className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
             />
             <span className="text-sm font-medium text-slate-700">
-              Select all on this page
+              Pilih semua di halaman ini
             </span>
           </label>
           {selectedItems.size > 0 && (
             <span className="text-sm text-slate-600">
-              {selectedItems.size} selected
+              {selectedItems.size} dipilih
             </span>
           )}
         </div>
@@ -454,7 +450,7 @@ export default function MemoriesPage() {
         {paginatedMemories.length === 0 ? (
           <div className="text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
             <p className="text-slate-500 text-lg">
-              {searchQuery ? 'No memories match your search' : 'No memories yet. Create one!'}
+              {searchQuery ? 'Tidak ada kenangan yang cocok dengan pencarianmu.' : 'Belum ada kenangan. Yuk tambahkan yang pertama!'}
             </p>
           </div>
         ) : (
@@ -472,7 +468,7 @@ export default function MemoriesPage() {
                     type="checkbox"
                     checked={selectedItems.has(memory.id)}
                     onChange={() => toggleItemSelection(memory.id)}
-                    className="w-5 h-5 rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+                    className="w-5 h-5 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
                   />
                 </div>
 
@@ -493,7 +489,7 @@ export default function MemoriesPage() {
                         </h3>
                       </div>
                       <p className="text-slate-600 text-sm mb-2">
-                        {new Date(memory.date).toLocaleDateString('en-US', {
+                        {new Date(memory.date).toLocaleDateString('id-ID', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
@@ -506,7 +502,7 @@ export default function MemoriesPage() {
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => handleEdit(memory)}
-                        className="px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                        className="px-3 py-2 text-sm font-medium text-violet-700 bg-violet-50 rounded-lg hover:bg-violet-100 transition-colors"
                       >
                         Edit
                       </button>
@@ -515,9 +511,9 @@ export default function MemoriesPage() {
                           setDeleteId(memory.id);
                           setShowConfirm(true);
                         }}
-                        className="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                        className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                       >
-                        Delete
+                        Hapus
                       </button>
                     </div>
                   </div>
@@ -546,8 +542,8 @@ export default function MemoriesPage() {
       {/* Confirm Delete Single */}
       <ConfirmDialog
         isOpen={showConfirm}
-        title="Delete Memory"
-        message="Are you sure you want to delete this memory? This action cannot be undone."
+        title="Hapus Kenangan"
+        message="Yakin ingin menghapus kenangan ini? Tindakan ini tidak bisa dibatalkan."
         onConfirm={handleDelete}
         onCancel={() => {
           setShowConfirm(false);
@@ -558,8 +554,8 @@ export default function MemoriesPage() {
       {/* Confirm Batch Delete */}
       <ConfirmDialog
         isOpen={showBatchConfirm}
-        title={`Delete ${selectedItems.size} Memories`}
-        message={`Are you sure you want to delete ${selectedItems.size} memories? This action cannot be undone.`}
+        title={`Hapus ${selectedItems.size} Kenangan`}
+        message={`Yakin ingin menghapus ${selectedItems.size} kenangan sekaligus? Tindakan ini tidak bisa dibatalkan.`}
         onConfirm={handleBatchDelete}
         onCancel={() => setShowBatchConfirm(false)}
       />

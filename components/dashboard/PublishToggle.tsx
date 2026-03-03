@@ -20,13 +20,10 @@ export function PublishToggle({ id, published, endpoint, onSuccess }: PublishTog
     const newStatus = !localPublished;
 
     try {
-      const token = sessionStorage.getItem('dashboard_token');
+      // Auth.js v5: cookie dikirim otomatis, tidak perlu header token
       const response = await fetch(`${endpoint}/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'X-Dashboard-Token': token }),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ published: newStatus }),
       });
 

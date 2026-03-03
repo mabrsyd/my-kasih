@@ -2,12 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Loader2, Pencil, Trash2 } from 'lucide-react';
 import {
   ConfirmDialog,
-  LoadingOverlay,
+  LoadingSpinner,
   SearchInput,
+  DashboardPageHeader,
+  DashboardCard,
+  DashboardInsetCard,
+  DashboardEmptyState,
 } from '@/components/dashboard';
-import { H1, P } from '@/components/ui/Typography';
 import toast from 'react-hot-toast';
 
 interface AboutChapter {
@@ -18,17 +22,19 @@ interface AboutChapter {
   order: number;
 }
 
+const emptyForm = { icon: '', title: '', content: '', order: 0 };
+
 export default function AboutPage() {
   const [chapters, setChapters] = useState<AboutChapter[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ icon: '', title: '', content: '', order: 0 });
+  const [formData, setFormData] = useState(emptyForm);
 
-  // Fetch chapters
   useEffect(() => {
     fetchChapters();
   }, []);
@@ -38,8 +44,8 @@ export default function AboutPage() {
       const res = await fetch('/api/about');
       const data = await res.json();
       setChapters(data);
-    } catch (error) {
-      toast.error('Failed to fetch chapters');
+    } catch {
+      toast.error('Gagal memuat bab cerita');
     } finally {
       setLoading(false);
     }
@@ -53,35 +59,29 @@ export default function AboutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formData.icon || !formData.title || !formData.content) {
-      toast.error('Please fill all fields');
+      toast.error('Isi semua field terlebih dahulu');
       return;
     }
-
+    setSaving(true);
     try {
       const method = editingId ? 'PUT' : 'POST';
       const url = editingId ? `/api/about/${editingId}` : '/api/about';
-
-      const token = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard_token') : '';
       const res = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'X-Dashboard-Token': token }),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
-      if (!res.ok) throw new Error('Failed to save');
-
-      toast.success(editingId ? 'Chapter updated' : 'Chapter created');
+      if (!res.ok) throw new Error('Gagal menyimpan');
+      toast.success(editingId ? 'Bab diperbarui' : 'Bab ditambahkan');
       setShowForm(false);
       setEditingId(null);
-      setFormData({ icon: '', title: '', content: '', order: 0 });
+      setFormData(emptyForm);
       fetchChapters();
-    } catch (error) {
-      toast.error('Failed to save chapter');
+    } catch {
+      toast.error('Gagal menyimpan bab');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -89,190 +89,204 @@ export default function AboutPage() {
     setFormData(chapter);
     setEditingId(chapter.id);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
-
     try {
-      const token = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard_token') : '';
-      const res = await fetch(`/api/about/${deleteId}`, {
-        method: 'DELETE',
-        headers: {
-          ...(token && { 'X-Dashboard-Token': token }),
-        },
-      });
-
-      if (!res.ok) throw new Error('Failed to delete');
-
-      toast.success('Chapter deleted');
+      const res = await fetch(`/api/about/${deleteId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Gagal menghapus');
+      toast.success('Bab dihapus');
       setShowConfirm(false);
       setDeleteId(null);
       fetchChapters();
-    } catch (error) {
-      toast.error('Failed to delete chapter');
+    } catch {
+      toast.error('Gagal menghapus bab');
     }
   };
 
-  if (loading) return <LoadingOverlay message="Loading chapters..." />;
+  const openNew = () => {
+    setEditingId(null);
+    setFormData(emptyForm);
+    setShowForm(true);
+  };
+
+  if (loading) return <LoadingSpinner size="lg" />;
 
   return (
     <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <H1>Tentang Kita</H1>
-            <P className="text-neutral-600 mt-2">Manage the story chapters that appear on the About page</P>
-          </div>
-          <button
-            onClick={() => {
-              setShowForm(true);
-              setEditingId(null);
-              setFormData({ icon: '', title: '', content: '', order: 0 });
-            }}
-            className="px-4 py-2 bg-purple-accent text-white rounded-lg font-medium hover:bg-purple-secondary transition-colors"
-          >
-            + Add Chapter
-          </button>
-        </div>
+      <DashboardPageHeader
+        title="Tentang Kita"
+        description="Kelola bab-bab cerita yang tampil di halaman About."
+        badge={chapters.length}
+        action={showForm ? undefined : { label: 'Tambah Bab', onClick: openNew }}
+        secondaryAction={
+          showForm
+            ? { label: 'Batalkan', onClick: () => { setShowForm(false); setEditingId(null); setFormData(emptyForm); } }
+            : undefined
+        }
+      />
 
-        {/* Search */}
-        <SearchInput onSearch={setSearchQuery} placeholder="Search chapters..." />
-
-        {/* Form Modal */}
-        {showForm && (
-          <motion.div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
-            <motion.form
-              onSubmit={handleSubmit}
-              className="bg-white rounded-lg p-6 max-w-2xl w-full space-y-4 max-h-[90vh] overflow-y-auto"
-            >
-              <h2 className="text-2xl font-bold text-rose-700">
-                {editingId ? 'Edit Chapter' : 'Add Chapter'}
-              </h2>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Icon/Emoji</label>
-                <input
-                  type="text"
-                  maxLength={2}
-                  value={formData.icon}
-                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                  placeholder="✦"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                />
+      {/* Inline Form */}
+      {showForm && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+        >
+          <DashboardCard title={editingId ? 'Edit Bab' : 'Bab Baru'}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Ikon / Emoji <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={2}
+                    value={formData.icon}
+                    onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                    placeholder="?"
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Urutan
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Judul <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Chapter title..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  placeholder="Judul bab cerita..."
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Content</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Isi Cerita <span className="text-red-400">*</span>
+                </label>
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Chapter story..."
-                  rows={6}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  placeholder="Tulis cerita bab ini..."
+                  rows={5}
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-y"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Order</label>
-                <input
-                  type="number"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                />
-              </div>
-
-              <div className="flex gap-3 justify-end pt-4">
+              <div className="flex gap-3 justify-end pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
-                  className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg font-medium hover:bg-slate-200"
+                  onClick={() => { setShowForm(false); setEditingId(null); setFormData(emptyForm); }}
+                  className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                 >
-                  Cancel
+                  Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600"
+                  disabled={saving}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
                 >
-                  {editingId ? 'Update' : 'Create'}
+                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {editingId ? 'Simpan Perubahan' : 'Tambah Bab'}
                 </button>
               </div>
-            </motion.form>
-          </motion.div>
-        )}
+            </form>
+          </DashboardCard>
+        </motion.div>
+      )}
 
-        {/* Chapters Grid */}
-        <div className="grid gap-4">
-          {filteredChapters.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">No chapters found</div>
-          ) : (
-            filteredChapters.map((chapter) => (
+      {/* Search */}
+      {chapters.length > 0 && (
+        <SearchInput onSearch={setSearchQuery} placeholder="Cari bab cerita..." />
+      )}
+
+      {/* Chapters List */}
+      <DashboardCard>
+        {filteredChapters.length === 0 ? (
+          <DashboardEmptyState
+            icon="??"
+            title={searchQuery ? 'Tidak ditemukan' : 'Belum ada bab cerita'}
+            description={
+              searchQuery
+                ? `Tidak ada bab yang cocok dengan "${searchQuery}".`
+                : 'Tambahkan bab pertama cerita kalian bersama.'
+            }
+            actionLabel={searchQuery ? undefined : 'Tambah Bab Pertama'}
+            onAction={searchQuery ? undefined : openNew}
+          />
+        ) : (
+          <div className="space-y-3">
+            {filteredChapters.map((chapter) => (
               <motion.div
                 key={chapter.id}
-                className="border border-slate-200 rounded-lg p-4 hover:border-rose-300 hover:shadow-md transition-all"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 hover:border-violet-200 hover:bg-slate-50 transition-all group"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex gap-4 flex-1">
-                    <div className="text-4xl">{chapter.icon}</div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-rose-700">{chapter.title}</h3>
-                      <p className="text-neutral-600 mt-1 line-clamp-2">{chapter.content}</p>
-                      <div className="text-xs text-slate-500 mt-2">Order: {chapter.order}</div>
-                    </div>
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
+                  style={{ background: 'rgba(196,176,238,0.15)' }}
+                >
+                  {chapter.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="font-semibold text-slate-900 text-sm">{chapter.title}</h3>
+                    <span className="text-xs text-slate-400">#{chapter.order}</span>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(chapter)}
-                      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        setDeleteId(chapter.id);
-                        setShowConfirm(true);
-                      }}
-                      className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  <p className="text-sm text-slate-500 mt-1 line-clamp-2">{chapter.content}</p>
+                </div>
+                <div className="flex gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleEdit(chapter)}
+                    className="p-2 text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                    title="Edit"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => { setDeleteId(chapter.id); setShowConfirm(true); }}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Hapus"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </motion.div>
-            ))
-          )}
-        </div>
-
-        {/* Confirm Delete Dialog */}
-        {showConfirm && (
-          <ConfirmDialog
-            isOpen={showConfirm}
-            title="Delete Chapter"
-            message="Are you sure you want to delete this chapter? This action cannot be undone."
-            confirmText="Delete"
-            cancelText="Cancel"
-            onConfirm={handleDelete}
-            onCancel={() => {
-              setShowConfirm(false);
-              setDeleteId(null);
-            }}
-            isDangerous
-          />
+            ))}
+          </div>
         )}
-      </div>
+      </DashboardCard>
+
+      <ConfirmDialog
+        isOpen={showConfirm}
+        title="Hapus Bab"
+        message="Yakin ingin menghapus bab ini? Tindakan ini tidak bisa dibatalkan."
+        confirmText="Hapus"
+        cancelText="Batal"
+        onConfirm={handleDelete}
+        onCancel={() => { setShowConfirm(false); setDeleteId(null); }}
+        isDangerous
+      />
+    </div>
   );
 }

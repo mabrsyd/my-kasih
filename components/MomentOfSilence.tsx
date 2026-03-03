@@ -29,7 +29,7 @@ export default function MomentOfSilence({
           style={{ background: 'linear-gradient(90deg, transparent, rgba(196,176,238,0.7) 40%, rgba(114,80,200,0.5) 50%, rgba(196,176,238,0.7) 60%, transparent)' }}
           initial={{ scaleX: 0, opacity: 0 }}
           animate={isInView ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0 }}
-          transition={{ duration: 1.4, ease: [0.4, 0, 0.2, 1], delay: 0.2 }}
+          transition={{ duration: 1.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number], delay: 0.2 }}
         />
 
         {/* Decorative symbol */}
@@ -43,13 +43,13 @@ export default function MomentOfSilence({
           ✦
         </motion.span>
 
-        {/* Quote */}
+        {/* Quote — Cormorant Garamond for maximum cinematic weight */}
         <motion.blockquote
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-          transition={{ duration: 1, delay: 0.5, ease: [0.4, 0, 0.2, 1] }}
-          className="font-serif-display text-2xl md:text-3xl leading-relaxed italic mb-8"
-          style={{ color: '#5b3dad' }}
+          transition={{ duration: 1, delay: 0.5, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number] }}
+          className="font-serif-elegant text-2xl md:text-3xl lg:text-4xl leading-relaxed italic mb-8"
+          style={{ color: '#5b3dad', letterSpacing: '0.01em' }}
         >
           &ldquo;{quote}&rdquo;
         </motion.blockquote>
@@ -73,7 +73,7 @@ export default function MomentOfSilence({
           style={{ background: 'linear-gradient(90deg, transparent, rgba(196,176,238,0.7) 40%, rgba(114,80,200,0.5) 50%, rgba(196,176,238,0.7) 60%, transparent)' }}
           initial={{ scaleX: 0, opacity: 0 }}
           animate={isInView ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0 }}
-          transition={{ duration: 1.4, ease: [0.4, 0, 0.2, 1], delay: 0.6 }}
+          transition={{ duration: 1.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number], delay: 0.6 }}
         />
       </div>
     </section>

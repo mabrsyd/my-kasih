@@ -18,7 +18,7 @@ export default function Navbar() {
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number] }}
       className={`fixed w-full top-0 z-50 transition-all duration-500 ${
         isScrolled 
           ? 'bg-white/70 backdrop-blur-xl shadow-romantic border-b border-purple-secondary/20' 
@@ -91,7 +91,7 @@ export default function Navbar() {
         <motion.div
           initial={false}
           animate={isOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
-          transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+          transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number] }}
           className="overflow-hidden md:hidden"
         >
           <div className="py-6 space-y-1">

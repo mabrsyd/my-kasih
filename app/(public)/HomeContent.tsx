@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -7,7 +7,9 @@ import AnimatedText from '@/components/AnimatedText';
 import FloatingHearts from '@/components/FloatingHearts';
 import MomentOfSilence from '@/components/MomentOfSilence';
 import ScrollReveal from '@/components/ScrollReveal';
-import { HERO_MESSAGES } from '@/lib/constants';
+import LoveCounter from '@/components/LoveCounter';
+import HeartTapCounter from '@/components/HeartTapCounter';
+import { HERO_MESSAGES, PARTNER_NAME, YOUR_NAME } from '@/lib/constants';
 import {
   PiEnvelopeSimpleFill,
   PiStarFourFill,
@@ -17,6 +19,7 @@ import {
   PiArrowRightLight,
   PiInfinity,
   PiSparkle,
+  PiFlowerFill,
 } from 'react-icons/pi';
 
 const NAV_CARDS = [
@@ -44,6 +47,12 @@ const NAV_CARDS = [
     label: 'Tentang Kita',
     desc: 'Cerita cinta kita, dari pertemuan pertama hingga selamanya',
   },
+  {
+    href: '/reasons',
+    Icon: PiFlowerFill,
+    label: 'Alasanku',
+    desc: 'Setiap alasan mengapa aku jatuh cinta padamu, tanpa henti',
+  },
 ];
 
 interface Props {
@@ -64,7 +73,7 @@ export default function HomeContent({ heroMessages }: Props) {
       <div className="grain-overlay" />
       <FloatingHearts count={6} />
 
-      {/* ── HERO ── */}
+      {/* -- HERO -- */}
       <section className="min-h-screen flex flex-col items-center justify-center px-6 relative">
         <div className="vignette" />
 
@@ -78,7 +87,7 @@ export default function HomeContent({ heroMessages }: Props) {
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number] }}
             className="mb-10 flex justify-center"
           >
             <div className="relative">
@@ -103,11 +112,11 @@ export default function HomeContent({ heroMessages }: Props) {
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 1.2, delay: 0.3, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }}
             className="font-serif-display font-light mb-4 leading-tight"
             style={{ fontSize: 'clamp(2.8rem, 7vw, 5rem)', color: '#4a3880', letterSpacing: '-0.02em' }}
           >
-            Untuk Kamu,
+            Untuk {PARTNER_NAME},
             <br />
             <em style={{ color: '#7250c8' }}>Yang Tercinta</em>
           </motion.h1>
@@ -116,18 +125,18 @@ export default function HomeContent({ heroMessages }: Props) {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.7, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 1, delay: 0.7, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number] }}
             className="font-serif-body text-lg leading-relaxed mb-10 max-w-md mx-auto"
             style={{ color: 'rgba(114,80,200,0.7)' }}
           >
             {randomMessage}
           </motion.p>
 
-          {/* Animated subtitle */}
+          {/* Animated subtitle — delayed so it starts AFTER H1 settles */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.4, duration: 1 }}
+            transition={{ delay: 1.9, duration: 1 }}
             className="mb-12"
           >
             <AnimatedText
@@ -184,7 +193,7 @@ export default function HomeContent({ heroMessages }: Props) {
         </motion.div>
       </section>
 
-      {/* ── FEATURE CARDS ── */}
+      {/* -- FEATURE CARDS -- */}
       <section className="section-breathe">
         <div className="max-w-5xl mx-auto px-6">
           <ScrollReveal>
@@ -261,44 +270,92 @@ export default function HomeContent({ heroMessages }: Props) {
         </div>
       </section>
 
-      {/* ── EMOTIONAL PAUSE ── */}
-      <MomentOfSilence
-        quote="Setiap detik bersamamu adalah hadiah terindah dalam hidupku"
-      />
-
-      {/* ── CLOSING ── */}
+      {/* -- LOVE COUNTER — after nav cards, emotion already built -- */}
       <section className="section-breathe">
-        <div className="content-intimate text-center px-4">
+        <div className="max-w-3xl mx-auto px-6">
           <ScrollReveal>
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              className="mb-8 flex justify-center"
-              style={{ color: 'rgba(196,176,238,0.6)' }}
-            >
-              <PiInfinity size={56} />
-            </motion.div>
+            <div className="text-center mb-10">
+              <p
+                className="text-xs tracking-widest uppercase mb-3 font-serif-body flex items-center justify-center gap-2"
+                style={{ color: 'rgba(155,94,162,0.6)' }}
+              >
+                <PiHeartFill size={11} /> Kita Bersama <PiHeartFill size={11} />
+              </p>
+              <h2
+                className="font-serif-display font-light"
+                style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', color: '#4a3880' }}
+              >
+                Setiap detik bersamamu berarti
+              </h2>
+            </div>
           </ScrollReveal>
-          <ScrollReveal delay={0.3}>
-            <p
-              className="font-serif-display italic text-xl md:text-2xl leading-relaxed"
-              style={{ color: 'rgba(114,80,200,0.65)' }}
-            >
-              Aku mencintaimu, hari ini, besok, dan selamanya.
-            </p>
-          </ScrollReveal>
-          <ScrollReveal delay={0.5}>
-            <p className="mt-4 text-xs tracking-widest uppercase font-serif-body" style={{ color: 'rgba(155,94,162,0.5)' }}>
-              &mdash; Untukmu yang tersayang
-            </p>
+          <ScrollReveal delay={0.2}>
+            <LoveCounter />
           </ScrollReveal>
         </div>
       </section>
 
-      <MomentOfSilence
-        quote="Aku mencintaimu bukan karena siapa kamu, tapi karena siapa aku saat bersamamu"
-        author="Selamanya milikmu"
-      />
+      {/* -- HEART TAP -- */}
+      <section className="section-breathe">
+        <div className="max-w-lg mx-auto px-6">
+          <ScrollReveal>
+            <div className="text-center mb-8">
+              <p
+                className="text-xs tracking-widest uppercase mb-3 font-serif-body"
+                style={{ color: 'rgba(155,94,162,0.6)' }}
+              >
+                ✦ Seberapa besar cintamu? ✦
+              </p>
+              <p
+                className="font-serif-display font-light text-lg"
+                style={{ color: '#4a3880' }}
+              >
+                Tap hati untuk menunjukkannya
+              </p>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <HeartTapCounter />
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* -- CLOSING — one strong coda, Cormorant Garamond for weight -- */}
+      <section style={{ padding: '8rem 0' }}>
+        <div className="content-intimate text-center px-4">
+          <ScrollReveal>
+            <motion.div
+              animate={{ scale: [1, 1.08, 1] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+              className="mb-10 flex justify-center"
+              style={{ color: 'rgba(196,176,238,0.5)' }}
+            >
+              <PiInfinity size={52} />
+            </motion.div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.25}>
+            <p
+              className="font-serif-elegant italic leading-relaxed"
+              style={{
+                fontSize: 'clamp(1.5rem, 3.5vw, 2.4rem)',
+                color: 'rgba(91,61,173,0.75)',
+                letterSpacing: '0.01em',
+              }}
+            >
+              Aku mencintaimu bukan karena siapa kamu,<br />
+              tapi karena siapa aku saat bersamamu.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={0.5}>
+            <p
+              className="mt-6 text-xs tracking-widest uppercase font-serif-body"
+              style={{ color: 'rgba(155,94,162,0.45)' }}
+            >
+              &mdash; {YOUR_NAME}
+            </p>
+          </ScrollReveal>
+        </div>
+      </section>
     </div>
   );
 }

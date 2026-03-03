@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import { useFetch, useUnsavedChanges, UnsavedChangesIndicator, useAutoSaveDraft } from '@/hooks';
@@ -13,6 +13,7 @@ import {
   StatusBadge,
   PublishToggle,
   DashboardEmptyState,
+  DashboardPageHeader,
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -119,14 +120,12 @@ export default function LettersPage() {
     setLoading(true);
 
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       const url = editingId ? `/api/letters/${editingId}` : '/api/letters';
 
       const response = await fetch(url, {
         method: editingId ? 'PATCH' : 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'X-Dashboard-Token': token }),
         },
         body: JSON.stringify({
           ...formData,
@@ -166,11 +165,9 @@ export default function LettersPage() {
     if (!deleteId) return;
 
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       const response = await fetch(`/api/letters/${deleteId}`, {
         method: 'DELETE',
         headers: {
-          ...(token && { 'X-Dashboard-Token': token }),
         },
       });
 
@@ -204,12 +201,10 @@ export default function LettersPage() {
 
   const handleTogglePublish = async (letter: Letter) => {
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       const response = await fetch(`/api/letters/${letter.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'X-Dashboard-Token': token }),
         },
         body: JSON.stringify({
           title: letter.title,
@@ -232,15 +227,13 @@ export default function LettersPage() {
 
   const handleBatchDelete = async () => {
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       
       await Promise.all(
         Array.from(selectedItems).map((id) =>
           fetch(`/api/letters/${id}`, {
             method: 'DELETE',
             headers: {
-              ...(token && { 'X-Dashboard-Token': token }),
-            },
+              },
           })
         )
       );
@@ -266,12 +259,10 @@ export default function LettersPage() {
     setLetters(lettersWithNewOrder);
 
     try {
-      const token = sessionStorage.getItem('dashboard_token');
       const response = await fetch('/api/letters/reorder', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'X-Dashboard-Token': token }),
         },
         body: JSON.stringify({
           items: lettersWithNewOrder.map((letter, index) => ({
@@ -325,57 +316,55 @@ export default function LettersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Letters</h1>
-          <p className="text-slate-600 text-sm mt-1">
-            {filteredLetters.length} letter{filteredLetters.length !== 1 ? 's' : ''}
-            {(searchQuery || filterPublished !== 'all') && ` (filtered from ${letters.length})`}
-            {letters.some((l) => l.published) && (
-              <span> • {letters.filter((l) => l.published).length} published</span>
-            )}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {selectedItems.size > 0 && (
-            <button
-              onClick={() => setShowBatchConfirm(true)}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
-            >
-              Delete {selectedItems.size} Selected
-            </button>
-          )}
-          <button
-            onClick={() => {
-              setEditingId(null);
-              setFormData({ title: '', content: '', published: false });
-              setSelectedImage(null);
-              setImageId(null);
-              setShowForm(!showForm);
-            }}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
-          >
-            {showForm ? '✖️ Cancel' : '➕ New Letter'}
-          </button>
-        </div>
-      </div>
+      <DashboardPageHeader
+        title="Surat Cinta"
+        description={`${filteredLetters.length} surat${(searchQuery || filterPublished !== 'all') ? ` (dari ${letters.length})` : ''} • ${letters.filter((l) => l.published).length} diterbitkan`}
+        badge={letters.length}
+        action={
+          showForm
+            ? undefined
+            : {
+                label: 'Surat Baru',
+                onClick: () => {
+                  setEditingId(null);
+                  setFormData({ title: '', content: '', published: false });
+                  setSelectedImage(null);
+                  setImageId(null);
+                  setShowForm(true);
+                },
+              }
+        }
+        secondaryAction={
+          showForm
+            ? {
+                label: 'Batalkan',
+                onClick: () => { setShowForm(false); setEditingId(null); },
+              }
+            : selectedItems.size > 0
+            ? {
+                label: `Hapus ${selectedItems.size} Dipilih`,
+                onClick: () => setShowBatchConfirm(true),
+              }
+            : undefined
+        }
+      />
 
       {/* Search and Filter */}
       <div className="flex gap-3">
         <div className="flex-1">
           <SearchInput
-            placeholder="Search letters by title or content..."
+            placeholder="Cari surat berdasarkan judul atau isi..."
             onSearch={setSearchQuery}
           />
         </div>
         <select
           value={filterPublished}
           onChange={(e) => setFilterPublished(e.target.value as 'all' | 'published' | 'draft')}
-          className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white"
         >
-          <option value="all">All Letters</option>
-          <option value="published">Published Only</option>
-          <option value="draft">Drafts Only</option>
+          <option value="all">Semua Surat</option>
+          <option value="published">Sudah Diterbitkan</option>
+          <option value="draft">Draft Saja</option>
         </select>
       </div>
 
@@ -389,8 +378,8 @@ export default function LettersPage() {
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Title
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Judul <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
@@ -398,24 +387,24 @@ export default function LettersPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                placeholder="Letter title"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                placeholder="Judul surat..."
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Content
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Isi Surat <span className="text-red-400">*</span>
               </label>
               <textarea
                 value={formData.content}
                 onChange={(e) =>
                   setFormData({ ...formData, content: e.target.value })
                 }
-                placeholder="Write your letter here..."
+                placeholder="Tulis suratmu di sini..."
                 rows={8}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 font-mono text-sm"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent font-mono"
               />
             </div>
 
@@ -427,17 +416,17 @@ export default function LettersPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, published: e.target.checked })
                   }
-                  className="w-4 h-4 rounded border-slate-300 text-red-500 focus:ring-red-500"
+                  className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
                 />
                 <span className="text-sm font-medium text-slate-700">
-                  Publish this letter
+                  Terbitkan surat ini
                 </span>
               </label>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Cover Image (Optional)
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Foto Sampul (opsional)
               </label>
               <MediaUploader
                 previewUrl={selectedImage || undefined}
@@ -445,29 +434,29 @@ export default function LettersPage() {
                 onSuccess={(mediaId, url) => {
                   setImageId(mediaId);
                   setSelectedImage(url);
-                  toast.success('Image uploaded');
+                  toast.success('Foto diunggah');
                 }}
                 onError={(error) => toast.error(error)}
               />
             </div>
 
-            <div className="flex gap-3 justify-end pt-4">
+            <div className="flex gap-3 justify-end pt-2">
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+                className="px-4 py-2.5 text-slate-700 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
               >
-                Cancel
+                Batal
               </button>
               <button
                 type="submit"
                 disabled={loading || isImageUploading}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
               >
                 {(loading || isImageUploading) && (
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
-                {isImageUploading ? 'Uploading image...' : `${editingId ? 'Update' : 'Create'} Letter`}
+                {isImageUploading ? 'Mengunggah...' : editingId ? 'Simpan Perubahan' : 'Buat Surat'}
               </button>
             </div>
           </form>
@@ -482,15 +471,15 @@ export default function LettersPage() {
               type="checkbox"
               checked={selectedItems.size === paginatedLetters.length && paginatedLetters.length > 0}
               onChange={toggleSelectAll}
-              className="w-4 h-4 rounded border-slate-300 text-red-500 focus:ring-red-500"
+              className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
             />
             <span className="text-sm font-medium text-slate-700">
-              Select all on this page
+              Pilih semua di halaman ini
             </span>
           </label>
           {selectedItems.size > 0 && (
             <span className="text-sm text-slate-600">
-              {selectedItems.size} selected
+              {selectedItems.size} dipilih
             </span>
           )}
         </div>
@@ -501,13 +490,13 @@ export default function LettersPage() {
         {paginatedLetters.length === 0 ? (
           <DashboardEmptyState
             icon={searchQuery || filterPublished !== 'all' ? '🔍' : '✉️'}
-            title={searchQuery || filterPublished !== 'all' ? 'No letters found' : 'No letters yet'}
+            title={searchQuery || filterPublished !== 'all' ? 'Tidak ditemukan' : 'Belum ada surat'}
             description={
               searchQuery || filterPublished !== 'all'
-                ? 'No letters match your current filters. Try adjusting your search or filters.'
-                : 'Write your first love letter to share your heartfelt words.'
+                ? 'Tidak ada surat yang cocok. Coba ubah pencarian atau filter.'
+                : 'Tulis surat cinta pertamamu dengan penuh perasaan.'
             }
-            actionLabel={searchQuery || filterPublished !== 'all' ? undefined : '➕ Write First Letter'}
+            actionLabel={searchQuery || filterPublished !== 'all' ? undefined : 'Tulis Surat Pertama'}
             onAction={
               searchQuery || filterPublished !== 'all'
                 ? undefined
@@ -579,22 +568,18 @@ export default function LettersPage() {
                       <div className="flex gap-2 flex-shrink-0">
                         <button
                           onClick={() => setViewingId(letter.id)}
-                          className="px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1"
+                          className="px-3 py-2 text-sm font-medium text-violet-700 bg-violet-50 rounded-lg hover:bg-violet-100 transition-colors"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          View
+                          Lihat
                         </button>
                         <button
                           onClick={() => {
                             setDeleteId(letter.id);
                             setShowConfirm(true);
                           }}
-                          className="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                          className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                         >
-                          🗑️
+                          Hapus
                         </button>
                       </div>
                     </div>
@@ -624,8 +609,8 @@ export default function LettersPage() {
       {/* Confirm Delete Single */}
       <ConfirmDialog
         isOpen={showConfirm}
-        title="Delete Letter"
-        message="Are you sure you want to delete this letter? This action cannot be undone."
+        title="Hapus Surat"
+        message="Yakin ingin menghapus surat ini? Tindakan ini tidak bisa dibatalkan."
         onConfirm={handleDelete}
         onCancel={() => {
           setShowConfirm(false);
@@ -636,8 +621,8 @@ export default function LettersPage() {
       {/* Confirm Batch Delete */}
       <ConfirmDialog
         isOpen={showBatchConfirm}
-        title={`Delete ${selectedItems.size} Letters`}
-        message={`Are you sure you want to delete ${selectedItems.size} letters? This action cannot be undone.`}
+        title={`Hapus ${selectedItems.size} Surat`}
+        message={`Yakin ingin menghapus ${selectedItems.size} surat? Tindakan ini tidak bisa dibatalkan.`}
         onConfirm={handleBatchDelete}
         onCancel={() => setShowBatchConfirm(false)}
       />
@@ -651,11 +636,11 @@ export default function LettersPage() {
           imageUrl={viewingItem.image?.publicUrl}
           publicUrl={`/letter#${viewingItem.id}`}
           fields={[
-            { label: 'Content', value: viewingItem.content, fullWidth: true },
+            { label: 'Isi Surat', value: viewingItem.content, fullWidth: true },
             { label: 'Status', value: viewingItem.published, type: 'boolean' },
-            { label: 'Display Order', value: `Position #${viewingItem.order + 1}` },
+            { label: 'Urutan Tampil', value: `Posisi #${viewingItem.order + 1}` },
           ]}
-          onEdit={() => handleEdit(viewingItem)}
+          onEdit={() => { handleEdit(viewingItem); setViewingId(null); }}
           onDelete={() => {
             setDeleteId(viewingItem.id);
             setShowConfirm(true);

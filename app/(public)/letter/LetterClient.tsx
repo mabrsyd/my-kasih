@@ -1,12 +1,12 @@
 'use client';
 
-import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import MomentOfSilence from '@/components/MomentOfSilence';
+import TypewriterText from '@/components/TypewriterText';
 import {
   cinematicFadeVariants,
-  letterContentVariants,
 } from '@/lib/animations';
 import { H1, P, Whisper } from '@/components/ui/Typography';
 import { EmptyState } from '@/components/dashboard/EmptyState';
@@ -30,6 +30,34 @@ export default function LetterClient({ letters }: Props) {
   const router = useRouter();
   const letterRef = useRef(null);
   const isLetterInView = useInView(letterRef, { once: true, margin: '-10%' });
+  const [printMode, setPrintMode] = useState(false);
+  const [showPostscript, setShowPostscript] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Time-on-page postscript: appears after 3 minutes of reading
+  useEffect(() => {
+    if (!isLetterInView || letters.length === 0) return;
+    const alreadySeen = sessionStorage.getItem('letter_ps_seen');
+    if (alreadySeen) return;
+    const timer = setTimeout(() => {
+      setShowPostscript(true);
+      sessionStorage.setItem('letter_ps_seen', '1');
+    }, 3 * 60 * 1000); // 3 minutes
+    return () => clearTimeout(timer);
+  }, [isLetterInView, letters.length]);
+
+  const handlePrint = () => {
+    setPrintMode(true);
+    setTimeout(() => {
+      window.print();
+      setPrintMode(false);
+    }, 300);
+  };
+
+  const navigateToFlower = () => {
+    setIsTransitioning(true);
+    setTimeout(() => router.push('/flower-animation'), 700);
+  };
 
   return (
     <div className="relative">
@@ -51,8 +79,8 @@ export default function LetterClient({ letters }: Props) {
           <motion.div
             initial={{ scale: 0.6, opacity: 0, rotateY: -20 }}
             animate={{ scale: 1, opacity: 0.6, rotateY: 0 }}
-            transition={{ duration: 1.5, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            onClick={() => router.push('/flower-animation')}
+            transition={{ duration: 1.5, delay: 0.3, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] as [number, number, number, number] }}
+            onClick={() => navigateToFlower()}
             className="text-6xl md:text-7xl mb-10 filter drop-shadow-sm cursor-pointer hover:opacity-100 transition-opacity group"
           >
             <motion.span
@@ -155,26 +183,34 @@ export default function LetterClient({ letters }: Props) {
                       {letter.title}
                     </motion.h2>
 
-                    {/* Letter paragraphs */}
-                    <div className="space-y-6">
+                    {/* Letter paragraphs — only fade in; TypewriterText IS the entrance animation */}
+                    <div className="space-y-8 print:space-y-5">
                       {paragraphs.map((paragraph, index) => (
                         <motion.p
                           key={index}
-                          className="text-intimate text-neutral-dark leading-relaxed"
-                          custom={index}
-                          variants={letterContentVariants}
-                          initial="hidden"
-                          animate={isLetterInView ? 'visible' : 'hidden'}
-                          transition={{ delay: 0.5 + index * 0.1 }}
+                          className="text-intimate text-neutral-dark leading-relaxed relative pb-2"
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          viewport={{ once: true, margin: '-5%' }}
+                          transition={{ duration: 0.4, delay: index * 0.12 }}
                         >
-                          {paragraph}
+                          {printMode ? (
+                            paragraph
+                          ) : (
+                            <TypewriterText
+                              text={paragraph}
+                              speed={22}
+                              startDelay={620 + index * 150}
+                              showSkip={index === 0}
+                            />
+                          )}
                         </motion.p>
                       ))}
                     </div>
 
                     {/* Signature */}
                     <motion.div
-                      className="mt-12 pt-8 border-t border-purple-secondary/30 text-center"
+                      className="mt-12 pt-8 border-t border-purple-secondary/30 text-center print:mt-8"
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       viewport={{ once: true }}
@@ -184,7 +220,7 @@ export default function LetterClient({ letters }: Props) {
                         Dengan sepenuh hati,
                       </Whisper>
                       <motion.span
-                        className="text-5xl inline-block filter drop-shadow-sm"
+                        className="text-5xl inline-block filter drop-shadow-sm print:animate-none"
                         animate={{ scale: [1, 1.12, 1] }}
                         transition={{
                           duration: 2.5,
@@ -197,7 +233,49 @@ export default function LetterClient({ letters }: Props) {
                       <p className="text-sm text-purple-accent mt-4 font-serif-body italic">
                         Selamanya milikmu
                       </p>
+
+                      {/* Print button — hidden in print view */}
+                      <motion.button
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 1.5 }}
+                        onClick={handlePrint}
+                        className="mt-8 text-[0.6rem] tracking-widest uppercase font-serif-body opacity-40 hover:opacity-80 transition-opacity print:hidden"
+                        style={{ color: 'rgba(155,94,162,0.6)' }}
+                      >
+                        ↓ Cetak surat ini
+                      </motion.button>
                     </motion.div>
+
+                    {/* Time-on-page postscript — appears only after 3 minutes of reading */}
+                    <AnimatePresence>
+                      {showPostscript && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 16 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }}
+                          className="mt-10 pt-8 border-t border-dashed"
+                          style={{ borderColor: 'rgba(196,176,238,0.3)' }}
+                        >
+                          <p
+                            className="font-serif-body text-sm italic leading-relaxed text-center"
+                            style={{ color: 'rgba(155,94,162,0.65)' }}
+                          >
+                            P.S. — Kalau kamu masih membaca sampai sejauh ini,
+                            aku ingin kamu tahu: kamu adalah hal terbaik yang pernah
+                            terjadi dalam hidupku. Terima kasih sudah ada.
+                          </p>
+                          <p
+                            className="text-center mt-4 text-[0.6rem] tracking-widest uppercase font-serif-body"
+                            style={{ color: 'rgba(196,176,238,0.5)' }}
+                          >
+                            ✦
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 );
               })}
@@ -217,7 +295,7 @@ export default function LetterClient({ letters }: Props) {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            onClick={() => router.push('/flower-animation')}
+            onClick={() => navigateToFlower()}
             className="cursor-pointer group"
           >
             <motion.span
@@ -237,6 +315,20 @@ export default function LetterClient({ letters }: Props) {
           </motion.div>
         </div>
       </section>
+
+      {/* Cinematic fade-to-black overlay before /flower-animation */}
+      <AnimatePresence>
+        {isTransitioning && (
+          <motion.div
+            key="flower-transition"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.65, ease: 'easeInOut' }}
+            className="fixed inset-0 bg-black z-[9998] pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
